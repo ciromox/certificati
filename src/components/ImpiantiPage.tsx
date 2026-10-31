@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Impianto, Cliente, TipologiaImpianto } from '../types';
-
+import { validateImpiantoElettrico, validateImpiantoGas, checkConformitaImpianto, ValidationResult } from '../validators';
+import ValidationMessages from './ValidationMessages';
 import { CadElement } from './MiniCAD';
 
 interface ImpiantiPageProps {
@@ -40,6 +41,35 @@ export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUp
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
   const [filterTipo, setFilterTipo] = useState<string>('');
+  const [techValidation, setTechValidation] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
+  const [conformita, setConformita] = useState<{ conforme: boolean; richiedeProgetto: boolean; note: string[] }>({ conforme: true, richiedeProgetto: false, note: [] });
+  
+  // Aggiorna validazioni tecniche quando cambiano i parametri
+  const updateTechValidation = () => {
+    let result: ValidationResult;
+    if (form.tipologia === 'elettrico') {
+      result = validateImpiantoElettrico({
+        potenza: form.potenza,
+        tensione: form.tensione,
+        puntiUtilizzazione: form.puntiUtilizzazione,
+      });
+    } else if (form.tipologia === 'gas') {
+      result = validateImpiantoGas({
+        portataContatore: form.potenza, // riusiamo potenza come portata per gas
+      });
+    } else {
+      result = { valid: true, errors: [], warnings: [] };
+    }
+    setTechValidation(result);
+    
+    // Verifica conformità
+    const conf = checkConformitaImpianto(form.tipologia, {
+      potenza: form.potenza,
+      puntiUtilizzazione: form.puntiUtilizzazione,
+      portataContatore: form.potenza,
+    });
+    setConformita(conf);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +159,13 @@ export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUp
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tipologia *</label>
-                  <select required value={form.tipologia} onChange={e => setForm({...form, tipologia: e.target.value as TipologiaImpianto})}
+                  <select required value={form.tipologia} onChange={e => {
+                    const newForm = {...form, tipologia: e.target.value as TipologiaImpianto};
+                    setForm(newForm);
+                    // Reset validazioni tecniche
+                    setTechValidation({ valid: true, errors: [], warnings: [] });
+                    setConformita({ conforme: true, richiedeProgetto: false, note: [] });
+                  }}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
                     {tipologie.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
@@ -168,24 +204,151 @@ export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUp
                     rows={3} placeholder="Descrizione caratteristiche dell'impianto..."
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" />
                 </div>
+                {/* Campi tecnici specifici per tipologia */}
                 {(form.tipologia === 'elettrico') && (
                   <>
+                    <div className="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs text-blue-800 font-medium mb-2">
+                        <i className="fas fa-info-circle mr-1"></i>
+                        Parametri impianto elettrico (CEI 64-8)
+                      </p>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Potenza (kW)</label>
-                      <input type="number" value={form.potenza || ''} onChange={e => setForm({...form, potenza: e.target.value ? Number(e.target.value) : undefined})}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" />
+                      <input type="number" step="0.1" value={form.potenza || ''} 
+                        onChange={e => {
+                          const newForm = {...form, potenza: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          // Validazione immediata
+                          const result = validateImpiantoElettrico({
+                            potenza: newForm.potenza,
+                            tensione: newForm.tensione,
+                            puntiUtilizzazione: newForm.puntiUtilizzazione,
+                          });
+                          setTechValidation(result);
+                          const conf = checkConformitaImpianto('elettrico', { potenza: newForm.potenza, puntiUtilizzazione: newForm.puntiUtilizzazione });
+                          setConformita(conf);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                        placeholder="Es: 6" />
+                      <p className="text-xs text-gray-500 mt-1">Standard: 3-6 kW per abitazioni</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Tensione (V)</label>
-                      <input type="number" value={form.tensione || ''} onChange={e => setForm({...form, tensione: e.target.value ? Number(e.target.value) : undefined})}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" />
+                      <select value={form.tensione || ''} onChange={e => {
+                          const newForm = {...form, tensione: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          const result = validateImpiantoElettrico({
+                            potenza: newForm.potenza,
+                            tensione: newForm.tensione,
+                            puntiUtilizzazione: newForm.puntiUtilizzazione,
+                          });
+                          setTechValidation(result);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Seleziona...</option>
+                        <option value="230">230V (Monofase)</option>
+                        <option value="400">400V (Trifase)</option>
+                        <option value="12">12V (SELV)</option>
+                        <option value="24">24V (SELV)</option>
+                        <option value="48">48V (SELV)</option>
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Punti utilizzazione</label>
-                      <input type="number" value={form.puntiUtilizzazione || ''} onChange={e => setForm({...form, puntiUtilizzazione: e.target.value ? Number(e.target.value) : undefined})}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500" />
+                      <input type="number" value={form.puntiUtilizzazione || ''} 
+                        onChange={e => {
+                          const newForm = {...form, puntiUtilizzazione: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          const result = validateImpiantoElettrico({
+                            potenza: newForm.potenza,
+                            tensione: newForm.tensione,
+                            puntiUtilizzazione: newForm.puntiUtilizzazione,
+                          });
+                          setTechValidation(result);
+                          const conf = checkConformitaImpianto('elettrico', { potenza: newForm.potenza, puntiUtilizzazione: newForm.puntiUtilizzazione });
+                          setConformita(conf);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                        placeholder="Es: 50" />
+                      <p className="text-xs text-gray-500 mt-1">Sopra 400 serve progetto</p>
                     </div>
                   </>
+                )}
+                
+                {(form.tipologia === 'gas') && (
+                  <>
+                    <div className="md:col-span-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-xs text-red-800 font-medium mb-2">
+                        <i className="fas fa-exclamation-triangle mr-1"></i>
+                        Impianto gas - Normativa UNI 7129
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Portata contatore (mc/h)</label>
+                      <select value={form.potenza || ''} onChange={e => {
+                          const newForm = {...form, potenza: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          const result = validateImpiantoGas({ portataContatore: newForm.potenza });
+                          setTechValidation(result);
+                          const conf = checkConformitaImpianto('gas', { portataContatore: newForm.potenza });
+                          setConformita(conf);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Seleziona...</option>
+                        <option value="2.5">G4 - 2.5 mc/h</option>
+                        <option value="4">G6 - 4 mc/h</option>
+                        <option value="6">G10 - 6 mc/h</option>
+                        <option value="10">G16 - 10 mc/h</option>
+                        <option value="16">G25 - 16 mc/h</option>
+                        <option value="25">G40 - 25 mc/h</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                
+                {(form.tipologia === 'riscaldamento' || form.tipologia === 'climatizzazione') && (
+                  <>
+                    <div className="md:col-span-2 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                      <p className="text-xs text-orange-800 font-medium mb-2">
+                        <i className="fas fa-thermometer-half mr-1"></i>
+                        Impianto termico - D.P.R. 74/2013
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Potenza termica (kW)</label>
+                      <input type="number" step="0.1" value={form.potenza || ''} 
+                        onChange={e => {
+                          const newForm = {...form, potenza: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          const conf = checkConformitaImpianto(form.tipologia, { potenza: newForm.potenza });
+                          setConformita(conf);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                        placeholder="Es: 24" />
+                      <p className="text-xs text-gray-500 mt-1">Sopra 35 kW serve libretto</p>
+                    </div>
+                  </>
+                )}
+                
+                {/* Messaggi di validazione tecnica */}
+                {(techValidation.errors.length > 0 || techValidation.warnings.length > 0) && (
+                  <div className="md:col-span-2">
+                    <ValidationMessages validation={techValidation} />
+                  </div>
+                )}
+                
+                {/* Avviso conformità */}
+                {conformita.richiedeProgetto && (
+                  <div className="md:col-span-2 bg-amber-50 border border-amber-300 rounded-lg p-3">
+                    <p className="text-sm text-amber-800 font-medium">
+                      <i className="fas fa-hard-hat mr-2"></i>
+                      <strong>Progetto obbligatorio</strong> (art. 5 D.M. 37/08)
+                    </p>
+                    <ul className="mt-2 ml-6 list-disc text-xs text-amber-700 space-y-1">
+                      {conformita.note.map((n, i) => <li key={i}>{n}</li>)}
+                    </ul>
+                  </div>
                 )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Data installazione</label>

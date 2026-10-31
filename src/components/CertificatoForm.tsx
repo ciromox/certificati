@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Certificato, Cliente, Impianto, Tecnico, TipoCertificato } from '../types';
 import { generateNumeroCertificato } from '../store';
+import { validateAbilitazioneTecnico, ValidationResult } from '../validators';
+import ValidationMessages from './ValidationMessages';
 
 interface CertificatoFormProps {
   clienti: Cliente[];
@@ -49,8 +51,71 @@ export default function CertificatoForm({ clienti, impianti, tecnico, certificat
   const [newMateriale, setNewMateriale] = useState('');
   const [selectedNorme, setSelectedNorme] = useState<string[]>(form.conformitaNorme);
 
+  // Verifica di conformità prima del salvataggio
+  const checkConformita = (): { valid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+    
+    // Verifica che ci sia almeno una norma di riferimento
+    if (selectedNorme.length === 0) {
+      issues.push('⚠️ Nessuna norma di riferimento selezionata');
+    }
+    
+    // Verifica abilitazione tecnico
+    if (form.abilitazioneTecnico && form.tecnicoResponsabile) {
+      const impianto = impianti.find(i => i.id === form.impiantoId);
+      if (impianto) {
+        const abVal = validateAbilitazioneTecnico(form.abilitazioneTecnico, impianto.tipologia);
+        if (!abVal.valid) {
+          issues.push(...abVal.errors.map(e => '❌ ' + e));
+        }
+      }
+    }
+    
+    // Verifica che la descrizione del lavoro sia sufficientemente dettagliata
+    if (form.descrizioneLavoro.length < 50) {
+      issues.push('⚠️ Descrizione del lavoro troppo breve (minimo 50 caratteri consigliati)');
+    }
+    
+    // Verifica che ci siano materiali
+    if (form.materialiUtilizzati.length === 0) {
+      issues.push('⚠️ Nessun materiale utilizzato indicato');
+    }
+    
+    // Verifica DiCo/DiRi specifiche
+    if (form.tipo === 'DiCo') {
+      if (!form.tecnicoResponsabile) issues.push('❌ Tecnico responsabile obbligatorio per DiCo');
+      if (!form.abilitazioneTecnico) issues.push('❌ Abilitazione tecnico obbligatoria per DiCo');
+    }
+    
+    if (form.tipo === 'DiRi') {
+      if (!form.verificheEffettuate || form.verificheEffettuate.length < 20) {
+        issues.push('⚠️ Per DiRi è necessario descrivere dettagliatamente le verifiche effettuate');
+      }
+    }
+    
+    return { valid: issues.filter(i => i.startsWith('❌')).length === 0, issues };
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const check = checkConformita();
+    if (!check.valid) {
+      const confirmed = confirm(
+        'Sono stati rilevati problemi di conformità:\n\n' + 
+        check.issues.join('\n') + 
+        '\n\nVuoi procedere comunque?'
+      );
+      if (!confirmed) return;
+    } else if (check.issues.length > 0) {
+      const confirmed = confirm(
+        'Avvisi:\n\n' + 
+        check.issues.join('\n') + 
+        '\n\nVuoi procedere comunque?'
+      );
+      if (!confirmed) return;
+    }
+    
     const dataToSave = {
       ...form,
       conformitaNorme: selectedNorme,
@@ -294,16 +359,46 @@ export default function CertificatoForm({ clienti, impianti, tecnico, certificat
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <button type="button" onClick={onCancel}
-            className="px-6 py-2.5 text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg transition">
-            Annulla
-          </button>
-          <button type="submit"
-            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-lg shadow-blue-200">
-            <i className="fas fa-save mr-2"></i>
-            {editingCertificato ? 'Aggiorna Certificato' : 'Salva Certificato'}
-          </button>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+            <i className="fas fa-shield-alt text-green-500"></i>
+            Verifica Conformità
+          </h2>
+          {(() => {
+            const check = checkConformita();
+            return (
+              <div className="space-y-2">
+                {check.issues.length === 0 ? (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <i className="fas fa-check-circle text-green-600"></i>
+                    <span className="text-green-800 font-medium">Tutti i controlli di conformità superati</span>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {check.issues.map((issue, i) => (
+                      <div key={i} className={`flex items-start gap-2 p-2 rounded-lg text-sm ${
+                        issue.startsWith('❌') ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        <span>{issue}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onCancel}
+              className="px-6 py-2.5 text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg transition">
+              Annulla
+            </button>
+            <button type="submit"
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-lg shadow-blue-200">
+              <i className="fas fa-save mr-2"></i>
+              {editingCertificato ? 'Aggiorna Certificato' : 'Salva Certificato'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

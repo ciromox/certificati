@@ -9,9 +9,10 @@ interface CertificatiPageProps {
   onEdit: (certificato: Certificato) => void;
   onDelete: (id: string) => void;
   onPrint: (certificato: Certificato) => void;
+  onWizard?: () => void;
 }
 
-export default function CertificatiPage({ certificati, clienti, impianti, onAdd, onEdit, onDelete, onPrint }: CertificatiPageProps) {
+export default function CertificatiPage({ certificati, clienti, impianti, onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
   const [search, setSearch] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterStato, setFilterStato] = useState('');
@@ -56,6 +57,24 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
     return styles[stato] || 'bg-gray-100 text-gray-800';
   };
 
+  // Verifica validità certificato
+  const checkValidita = (cert: Certificato) => {
+    if (!cert.dataValidita) return { valida: true, giorni: null, label: 'Nessuna scadenza' };
+    
+    const oggi = new Date();
+    const scadenza = new Date(cert.dataValidita);
+    const diffTime = scadenza.getTime() - oggi.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      return { valida: false, giorni: diffDays, label: `Scaduto da ${Math.abs(diffDays)} giorni` };
+    } else if (diffDays <= 30) {
+      return { valida: true, giorni: diffDays, label: `Scade tra ${diffDays} giorni` };
+    } else {
+      return { valida: true, giorni: diffDays, label: `Valido per ${diffDays} giorni` };
+    }
+  };
+
   const filtered = certificati.filter(c => {
     const matchSearch = `${c.numero} ${getClienteNome(c.clienteId)}`.toLowerCase().includes(search.toLowerCase());
     const matchTipo = !filterTipo || c.tipo === filterTipo;
@@ -70,11 +89,20 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Certificati</h1>
           <p className="text-gray-500 mt-1">Gestione dichiarazioni di conformità e rispondenza</p>
         </div>
-        <button onClick={onAdd}
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-purple-200">
-          <i className="fas fa-plus"></i>
-          <span>Nuovo Certificato</span>
-        </button>
+        <div className="flex gap-2">
+          {onWizard && (
+            <button onClick={onWizard}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-blue-200">
+              <i className="fas fa-magic"></i>
+              <span>Wizard DiCo</span>
+            </button>
+          )}
+          <button onClick={onAdd}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-purple-200">
+            <i className="fas fa-plus"></i>
+            <span>Nuovo Certificato</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -138,6 +166,19 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
                       <i className="fas fa-calendar mr-1"></i>
                       Rilasciato: {new Date(cert.dataRilascio).toLocaleDateString('it-IT')}
                     </p>
+                    {cert.dataValidita && (() => {
+                      const validita = checkValidita(cert);
+                      return (
+                        <p className={`text-xs mt-0.5 font-medium ${
+                          !validita.valida ? 'text-red-600' : 
+                          validita.giorni !== null && validita.giorni <= 30 ? 'text-amber-600' : 
+                          'text-green-600'
+                        }`}>
+                          <i className={`fas ${!validita.valida ? 'fa-times-circle' : validita.giorni !== null && validita.giorni <= 30 ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-1`}></i>
+                          {validita.label}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

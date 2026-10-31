@@ -139,6 +139,42 @@ export default function SchedeTecnichePage({ schede, clienti, impianti, onAdd, o
         </select>
       </div>
 
+      {/* Pannello Verifica Conformità Schede */}
+      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <h3 className="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2">
+          <i className="fas fa-clipboard-check text-indigo-500"></i>
+          Stato Conformità Schede
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+            <p className="text-2xl font-bold text-yellow-700">{schede.filter(s => s.stato === 'bozza').length}</p>
+            <p className="text-xs text-yellow-800">Da completare</p>
+          </div>
+          <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-center">
+            <p className="text-2xl font-bold text-blue-700">{schede.filter(s => s.stato === 'compilata').length}</p>
+            <p className="text-xs text-blue-800">Da firmare</p>
+          </div>
+          <div className="p-2 bg-green-50 border border-green-200 rounded-lg text-center">
+            <p className="text-2xl font-bold text-green-700">{schede.filter(s => s.stato === 'firmata').length}</p>
+            <p className="text-xs text-green-800">Conformi</p>
+          </div>
+          <div className="p-2 bg-gray-50 border border-gray-200 rounded-lg text-center">
+            <p className="text-2xl font-bold text-gray-700">{schede.filter(s => s.stato === 'archiviata').length}</p>
+            <p className="text-xs text-gray-800">Archiviate</p>
+          </div>
+        </div>
+        
+        {/* Avvisi schede incomplete */}
+        {schede.filter(s => s.stato === 'bozza').length > 0 && (
+          <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-xs text-amber-800">
+              <i className="fas fa-exclamation-triangle mr-1"></i>
+              <strong>{schede.filter(s => s.stato === 'bozza').length} schede in bozza</strong> richiedono completamento e firma per essere conformi al D.M. 37/08
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Lista schede */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">

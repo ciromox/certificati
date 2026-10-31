@@ -12,9 +12,11 @@ import CertificatoPrint from './components/CertificatoPrint';
 import TecnicoPage from './components/TecnicoPage';
 import SchedeTecnichePage from './components/SchedeTecnichePage';
 import MiniCAD from './components/MiniCAD';
+import WizardDiCo from './components/WizardDiCo';
+import ArchivioAllegati, { Allegato, loadAllegati, saveAllegati } from './components/ArchivioAllegati';
 import Sidebar from './components/Sidebar';
 
-type Page = 'dashboard' | 'clienti' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad';
+type Page = 'dashboard' | 'clienti' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad' | 'allegati';
 
 export default function App() {
   const [data, setData] = useState<AppData>(loadData());
@@ -25,6 +27,8 @@ export default function App() {
   const [printingCertificato, setPrintingCertificato] = useState<Certificato | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cadImpiantoId, setCadImpiantoId] = useState<string | null>(null);
+  const [showWizardDiCo, setShowWizardDiCo] = useState(false);
+  const [allegati, setAllegati] = useState<Allegato[]>(loadAllegati());
 
   useEffect(() => {
     setData(loadData());
@@ -132,6 +136,26 @@ export default function App() {
     }
   };
 
+  // Gestione Wizard DiCo
+  const handleWizardDiCoComplete = (certificato: any, allegatiFile: File[]) => {
+    handleAddCertificato(certificato);
+    setShowWizardDiCo(false);
+    // TODO: Gestire upload allegati
+  };
+
+  // Gestione Archivio Allegati
+  const handleAddAllegati = (nuoviAllegati: Allegato[]) => {
+    const updated = [...allegati, ...nuoviAllegati];
+    setAllegati(updated);
+    saveAllegati(updated);
+  };
+
+  const handleDeleteAllegato = (id: string) => {
+    const updated = allegati.filter(a => a.id !== id);
+    setAllegati(updated);
+    saveAllegati(updated);
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
@@ -167,6 +191,7 @@ export default function App() {
             onEdit={handleEditCertificato}
             onDelete={handleDeleteCertificato}
             onPrint={handlePrintCertificato}
+            onWizard={() => setShowWizardDiCo(true)}
           />
         );
       case 'nuovo-certificato':
@@ -215,8 +240,23 @@ export default function App() {
             elementi={schemiCad[cadImpiantoId] || []}
             onChange={handleCADChange}
             onClose={() => { setCadImpiantoId(null); setCurrentPage('impianti'); }}
+            impiantoId={cadImpiantoId}
           />
         ) : null;
+      case 'allegati':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Archivio Allegati</h1>
+              <p className="text-gray-500 mt-1">Gestione file allegati a certificati, schede tecniche e impianti</p>
+            </div>
+            <ArchivioAllegati
+              allegati={allegati}
+              onAdd={handleAddAllegati}
+              onDelete={handleDeleteAllegato}
+            />
+          </div>
+        );
       default:
         return <Dashboard data={data} schede={schede} onNavigate={(page: string) => setCurrentPage(page as Page)} />;
     }
@@ -248,6 +288,18 @@ export default function App() {
           {renderPage()}
         </div>
       </main>
+
+      {/* Wizard DiCo Modal */}
+      {showWizardDiCo && (
+        <WizardDiCo
+          clienti={data.clienti}
+          impianti={data.impianti}
+          tecnico={data.tecnico}
+          certificati={data.certificati}
+          onComplete={handleWizardDiCoComplete}
+          onCancel={() => setShowWizardDiCo(false)}
+        />
+      )}
     </div>
   );
 }

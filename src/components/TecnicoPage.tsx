@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Tecnico } from '../types';
+import { validateCodiceFiscale, validatePartitaIva, validateEmail, validateTelefono, validateCAP, validateProvincia, ValidationResult } from '../validators';
+import ValidationMessages from './ValidationMessages';
 
 interface TecnicoPageProps {
   tecnico: Tecnico | null;
@@ -16,6 +18,35 @@ const emptyForm = {
 export default function TecnicoPage({ tecnico, onSave }: TecnicoPageProps) {
   const [form, setForm] = useState(tecnico || emptyForm);
   const [saved, setSaved] = useState(false);
+  const [validations, setValidations] = useState<{
+    codiceFiscale: ValidationResult;
+    partitaIva: ValidationResult;
+    email: ValidationResult;
+    telefono: ValidationResult;
+    cap: ValidationResult;
+    provincia: ValidationResult;
+  }>({
+    codiceFiscale: { valid: true, errors: [], warnings: [] },
+    partitaIva: { valid: true, errors: [], warnings: [] },
+    email: { valid: true, errors: [], warnings: [] },
+    telefono: { valid: true, errors: [], warnings: [] },
+    cap: { valid: true, errors: [], warnings: [] },
+    provincia: { valid: true, errors: [], warnings: [] },
+  });
+  
+  const updateValidation = (field: keyof typeof validations, value: string) => {
+    let result: ValidationResult;
+    switch (field) {
+      case 'codiceFiscale': result = validateCodiceFiscale(value); break;
+      case 'partitaIva': result = validatePartitaIva(value); break;
+      case 'email': result = validateEmail(value); break;
+      case 'telefono': result = validateTelefono(value); break;
+      case 'cap': result = validateCAP(value); break;
+      case 'provincia': result = validateProvincia(value); break;
+      default: result = { valid: true, errors: [], warnings: [] };
+    }
+    setValidations(prev => ({ ...prev, [field]: result }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,13 +89,31 @@ export default function TecnicoPage({ tecnico, onSave }: TecnicoPageProps) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Codice Fiscale *</label>
-              <input required type="text" value={form.codiceFiscale} onChange={e => setForm({...form, codiceFiscale: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              <input required type="text" value={form.codiceFiscale} 
+                onChange={e => {
+                  const val = e.target.value.toUpperCase();
+                  setForm({...form, codiceFiscale: val});
+                  updateValidation('codiceFiscale', val);
+                }}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  form.codiceFiscale && !validations.codiceFiscale.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                }`}
+                placeholder="16 caratteri alfanumerici" />
+              {form.codiceFiscale && <ValidationMessages validation={validations.codiceFiscale} compact />}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label>
-              <input type="text" value={form.partitaIva} onChange={e => setForm({...form, partitaIva: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+              <input type="text" value={form.partitaIva} 
+                onChange={e => {
+                  const val = e.target.value;
+                  setForm({...form, partitaIva: val});
+                  if (val) updateValidation('partitaIva', val);
+                }}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  form.partitaIva && !validations.partitaIva.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                }`}
+                placeholder="11 cifre" />
+              {form.partitaIva && <ValidationMessages validation={validations.partitaIva} compact />}
             </div>
           </div>
         </div>
@@ -165,6 +214,46 @@ export default function TecnicoPage({ tecnico, onSave }: TecnicoPageProps) {
             <li><strong>f)</strong> impianti antifurto</li>
             <li><strong>g)</strong> ascensori e montacarichi</li>
           </ul>
+        </div>
+      </div>
+
+      {/* Requisiti Professionali */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+          <i className="fas fa-graduation-cap text-purple-500"></i>
+          Requisiti Professionali (art. 3 D.M. 37/08)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="font-medium text-gray-800 mb-1">Lettera a) - Titolo di studio</p>
+            <p className="text-gray-600">Laurea in ingegneria o architettura, oppure diploma tecnico, con specializzazione relativa</p>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="font-medium text-gray-800 mb-1">Lettera b) - Attestato</p>
+            <p className="text-gray-600">Attestato conseguito presso organismo paritetico (corso di formazione professionale)</p>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="font-medium text-gray-800 mb-1">Lettera c) - Prestazione lavorativa</p>
+            <p className="text-gray-600">Prestazione operaia per almeno 3 anni consecutivi presso impresa installatrice</p>
+          </div>
+          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <p className="font-medium text-gray-800 mb-1">Lettera d) - Titoli esteri</p>
+            <p className="text-gray-600">Titolo di studio o attestato conseguito in stati UE, riconosciuto in Italia</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Disclaimer Legale */}
+      <div className="bg-red-50 rounded-xl p-6 border border-red-200">
+        <h3 className="font-bold text-red-800 mb-2 flex items-center gap-2">
+          <i className="fas fa-gavel"></i>
+          Responsabilità e Adempimenti
+        </h3>
+        <div className="text-sm text-red-700 space-y-2">
+          <p><strong>Art. 7 D.M. 37/08:</strong> Il responsabile tecnico risponde della conformità dell'impianto alla regola dell'arte.</p>
+          <p><strong>Art. 10:</strong> La dichiarazione di conformità è resa sotto la propria responsabilità penale.</p>
+          <p><strong>Art. 13:</strong> Sanzioni amministrative e penali per dichiarazioni false o mendaci.</p>
+          <p className="mt-3 pt-3 border-t border-red-200"><strong>GDPR:</strong> I dati personali inseriti sono trattati nel rispetto del Reg. UE 2016/679 e conservati nel browser dell'utente.</p>
         </div>
       </div>
     </div>
