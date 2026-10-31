@@ -1,11 +1,13 @@
 import { AppData } from '../types';
+import { SchedaTecnica } from '../schedeTecniche';
 
 interface DashboardProps {
   data: AppData;
+  schede?: SchedaTecnica[];
   onNavigate: (page: string) => void;
 }
 
-export default function Dashboard({ data, onNavigate }: DashboardProps) {
+export default function Dashboard({ data, schede = [], onNavigate }: DashboardProps) {
   const { clienti, impianti, certificati } = data;
   
   const certificatiAttivi = certificati.filter(c => c.stato === 'emesso');
@@ -17,7 +19,7 @@ export default function Dashboard({ data, onNavigate }: DashboardProps) {
     { label: 'Impianti', value: impianti.length, icon: 'fas fa-building', color: 'bg-green-500', page: 'impianti' },
     { label: 'Certificati Emessi', value: certificatiAttivi.length, icon: 'fas fa-file-circle-check', color: 'bg-emerald-500', page: 'certificati' },
     { label: 'In Bozza', value: certificatiBozza.length, icon: 'fas fa-file-pen', color: 'bg-yellow-500', page: 'certificati' },
-    { label: 'Scaduti', value: certificatiScaduti.length, icon: 'fas fa-file-circle-xmark', color: 'bg-red-500', page: 'certificati' },
+    { label: 'Schede Tecniche', value: schede.length, icon: 'fas fa-file-medical', color: 'bg-indigo-500', page: 'schede' },
     { label: 'Totale Certificati', value: certificati.length, icon: 'fas fa-folder-open', color: 'bg-purple-500', page: 'certificati' },
   ];
 
@@ -148,7 +150,7 @@ export default function Dashboard({ data, onNavigate }: DashboardProps) {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={() => onNavigate('clienti')}
           className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all text-left group"
@@ -188,6 +190,20 @@ export default function Dashboard({ data, onNavigate }: DashboardProps) {
             <div>
               <p className="font-medium text-gray-800">Nuovo Certificato</p>
               <p className="text-xs text-gray-500">Crea DiCo o DiRi</p>
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => onNavigate('schede')}
+          className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition">
+              <i className="fas fa-file-medical text-indigo-600"></i>
+            </div>
+            <div>
+              <p className="font-medium text-gray-800">Nuova Scheda Tecnica</p>
+              <p className="text-xs text-gray-500">DiCo, Libretto, Rapporti</p>
             </div>
           </div>
         </button>

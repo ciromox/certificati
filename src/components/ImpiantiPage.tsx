@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Impianto, Cliente, TipologiaImpianto } from '../types';
 
+import { CadElement } from './MiniCAD';
+
 interface ImpiantiPageProps {
   impianti: Impianto[];
   clienti: Cliente[];
+  schemiCad: Record<string, CadElement[]>;
   onAdd: (impianto: Omit<Impianto, 'id' | 'dataCreazione'>) => void;
   onUpdate: (impianto: Impianto) => void;
   onDelete: (id: string) => void;
+  onOpenCAD: (impiantoId: string) => void;
 }
 
 const tipologie: { value: TipologiaImpianto; label: string; icon: string }[] = [
@@ -30,7 +34,7 @@ const emptyForm = {
 const getTipologiaLabel = (t: string) => tipologie.find(x => x.value === t)?.label || t;
 const getTipologiaIcon = (t: string) => tipologie.find(x => x.value === t)?.icon || 'fas fa-cog';
 
-export default function ImpiantiPage({ impianti, clienti, onAdd, onUpdate, onDelete }: ImpiantiPageProps) {
+export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUpdate, onDelete, onOpenCAD }: ImpiantiPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Impianto | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -228,6 +232,10 @@ export default function ImpiantiPage({ impianti, clienti, onAdd, onUpdate, onDel
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <button onClick={() => onOpenCAD(impianto.id)} title="Schema Impianto"
+                    className="p-1.5 text-gray-400 hover:text-indigo-600 transition">
+                    <i className="fas fa-drafting-compass text-sm"></i>
+                  </button>
                   <button onClick={() => handleEdit(impianto)} className="p-1.5 text-gray-400 hover:text-blue-600 transition">
                     <i className="fas fa-edit text-sm"></i>
                   </button>
@@ -240,6 +248,9 @@ export default function ImpiantiPage({ impianti, clienti, onAdd, onUpdate, onDel
                 <p><i className="fas fa-map-marker-alt w-4 text-gray-400"></i> {impianto.indirizzo}, {impianto.citta}</p>
                 <p><i className="fas fa-home w-4 text-gray-400"></i> {impianto.destinazioneUso}</p>
                 {impianto.potenza && <p><i className="fas fa-bolt w-4 text-gray-400"></i> {impianto.potenza} kW</p>}
+                {schemiCad[impianto.id] && schemiCad[impianto.id].length > 0 && (
+                  <p className="text-indigo-600 font-medium"><i className="fas fa-drafting-compass w-4"></i> Schema CAD presente ({schemiCad[impianto.id].length} elementi)</p>
+                )}
               </div>
             </div>
           ))}

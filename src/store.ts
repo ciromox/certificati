@@ -1,6 +1,10 @@
 import { AppData, Cliente, Impianto, Certificato, Tecnico } from './types';
+import { SchedaTecnica } from './schedeTecniche';
+import { CadElement } from './components/MiniCAD';
 
 const STORAGE_KEY = 'certificazioni_37_2008_data';
+const SCHEDE_KEY = 'certificazioni_37_2008_schede';
+const CAD_KEY = 'certificazioni_37_2008_cad';
 
 const defaultData: AppData = {
   clienti: [],
@@ -156,4 +160,60 @@ export function importDataFromJSON(file: File): Promise<AppData> {
     reader.onerror = reject;
     reader.readAsText(file);
   });
+}
+
+// Funzioni per le Schede Tecniche
+export function loadSchede(): SchedaTecnica[] {
+  try {
+    const raw = localStorage.getItem(SCHEDE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error('Errore caricamento schede:', e);
+  }
+  return [];
+}
+
+export function saveSchede(schede: SchedaTecnica[]): void {
+  localStorage.setItem(SCHEDE_KEY, JSON.stringify(schede));
+}
+
+export function addScheda(schede: SchedaTecnica[], scheda: Omit<SchedaTecnica, 'id' | 'dataCreazione' | 'dataModifica'>): SchedaTecnica[] {
+  const newScheda: SchedaTecnica = {
+    ...scheda,
+    id: generateId(),
+    dataCreazione: new Date().toISOString(),
+    dataModifica: new Date().toISOString(),
+  };
+  const updated = [...schede, newScheda];
+  saveSchede(updated);
+  return updated;
+}
+
+export function updateScheda(schede: SchedaTecnica[], scheda: SchedaTecnica): SchedaTecnica[] {
+  const updated = schede.map(s => s.id === scheda.id ? scheda : s);
+  saveSchede(updated);
+  return updated;
+}
+
+export function deleteScheda(schede: SchedaTecnica[], id: string): SchedaTecnica[] {
+  const updated = schede.filter(s => s.id !== id);
+  saveSchede(updated);
+  return updated;
+}
+
+// Funzioni per gli schemi CAD
+export function loadCadSchemi(): Record<string, CadElement[]> {
+  try {
+    const raw = localStorage.getItem(CAD_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error('Errore caricamento schemi CAD:', e);
+  }
+  return {};
+}
+
+export function saveCadSchema(impiantoId: string, elementi: CadElement[]): void {
+  const schemi = loadCadSchemi();
+  schemi[impiantoId] = elementi;
+  localStorage.setItem(CAD_KEY, JSON.stringify(schemi));
 }
