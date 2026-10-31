@@ -19,6 +19,7 @@ export interface SchedaTecnica {
   tipo: TipoSchedaTecnica;
   impiantoId: string;
   clienteId: string;
+  certificatoId?: string; // Collegamento al certificato DiCo
   dataCompilazione: string;
   dataValidita?: string;
   stato: 'bozza' | 'compilata' | 'firmata' | 'archiviata';

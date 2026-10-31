@@ -166,6 +166,8 @@ export default function SuperWizardProject({
 
   const handleCompleteProject = () => {
     const numeroCertificato = generateNumeroCertificato('DiCo', certificati);
+    
+    // Crea il certificato con tutti i campi obbligatori del modello ministeriale
     const certificato = {
       numero: numeroCertificato,
       tipo: 'DiCo' as const,
@@ -173,6 +175,62 @@ export default function SuperWizardProject({
       clienteId: selectedClienteId,
       dataRilascio: new Date().toISOString().split('T')[0],
       stato: 'emesso' as const,
+      
+      // Dati Dichiarante (Ditta Installatrice)
+      dichiaranteNome: tecnico?.nome || '',
+      dichiaranteCognome: tecnico?.cognome || '',
+      dichiaranteRuolo: 'titolare' as const,
+      impresaRagioneSociale: tecnico?.azienda || '',
+      impresaSettore: impiantoSelezionato?.tipologia || '',
+      impresaSedeLegaleIndirizzo: tecnico?.indirizzo || '',
+      impresaSedeLegaleNumero: '',
+      impresaSedeLegaleComune: tecnico?.citta || '',
+      impresaSedeLegaleProvincia: tecnico?.provincia || '',
+      impresaSedeLegaleCAP: tecnico?.cap || '',
+      impresaPartitaIVA: tecnico?.partitaIva || '',
+      impresaCodiceFiscale: tecnico?.codiceFiscale || '',
+      impresaIscrizioneCCIAA: '',
+      impresaIscrizioneCCIAANumero: '',
+      impresaIscrizioneAlboArtigiani: '',
+      impresaIscrizioneAlboArtigianiNumero: '',
+      
+      // Dati Impianto
+      descrizioneImpianto: impiantoSelezionato?.tipologia || '',
+      tipoIntervento: 'nuovo' as const,
+      
+      // Dati Committente
+      committenteNome: clienteSelezionato?.nome || '',
+      committenteCognome: clienteSelezionato?.cognome || '',
+      committenteRagioneSociale: clienteSelezionato?.ragioneSociale || '',
+      
+      // Dati Ubicazione
+      ubicazioneComune: impiantoSelezionato?.citta || '',
+      ubicazioneProvincia: impiantoSelezionato?.provincia || '',
+      ubicazioneIndirizzo: impiantoSelezionato?.indirizzo || '',
+      ubicazioneNumero: '',
+      
+      // Dati Proprietario (stesso del committente se non specificato)
+      proprietarioNome: clienteSelezionato?.nome || '',
+      proprietarioCognome: clienteSelezionato?.cognome || '',
+      proprietarioRagioneSociale: clienteSelezionato?.ragioneSociale || '',
+      
+      // Dati Edificio
+      usoEdificio: 'civile' as const,
+      
+      // Dichiarazione
+      rispettatoProgetto: true,
+      seguitoNormativaTecnica: true,
+      installatoComponentiRegolaArte: true,
+      controllatoImpiantoSicurezza: true,
+      
+      // Allegati Obbligatori
+      allegatoProgetto: true,
+      allegatoRelazioneMateriali: true,
+      allegatoSchemaImpianto: true,
+      allegatoDichiarazioniPrecedenti: false,
+      allegatoCertificatoRequisiti: true,
+      
+      // Dati Tecnici
       descrizioneLavoro: certificatoData.descrizioneLavoro || '',
       materialiUtilizzati: certificatoData.materialiUtilizzati || [],
       verificheEffettuate: certificatoData.verificheEffettuate || '',
@@ -182,11 +240,18 @@ export default function SuperWizardProject({
       firmaTecnico: tecnico ? `${tecnico.nome} ${tecnico.cognome}` : '',
     };
 
+    // Collega tutte le schede allo stesso numero DiCo
+    const schedeCollegate = schedeCompletate.map(scheda => ({
+      ...scheda,
+      certificatoId: numeroCertificato,
+      numero: `${numeroCertificato}-ALL-${schedeCompletate.indexOf(scheda) + 1}`
+    }));
+
     onComplete({
       cliente: clienteSelezionato!,
       impianto: impiantoSelezionato!,
       certificato,
-      schede: schedeCompletate,
+      schede: schedeCollegate,
     });
   };
 
