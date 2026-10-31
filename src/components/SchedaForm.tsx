@@ -23,8 +23,73 @@ export default function SchedaForm({ scheda, clienti, impianti, onSave, onCancel
 
   const config = CONFIG_SCHEDE[tipo];
 
+  // Verifica conformità scheda
+  const checkSchedaConformita = (): { valid: boolean; issues: string[] } => {
+    const issues: string[] = [];
+    
+    // Verifica campi obbligatori specifici per tipo
+    if (tipo === 'DiCo' || tipo === 'DiRi') {
+      if (!form.descrizioneLavori || form.descrizioneLavori.length < 20) {
+        issues.push('❌ Descrizione lavori troppo breve o mancante');
+      }
+      if (!form.tecnico) {
+        issues.push('❌ Tecnico responsabile non indicato');
+      }
+    }
+    
+    if (tipo === 'LibrettoImpianto') {
+      if (!form.potenza) issues.push('❌ Potenza nominale obbligatoria');
+      if (!form.tipoGeneratore) issues.push('❌ Tipo generatore obbligatorio');
+    }
+    
+    if (tipo === 'RapportoControllo') {
+      if (!form.dataControllo) issues.push('❌ Data controllo obbligatoria');
+      if (!form.esito) issues.push('❌ Esito controllo obbligatorio');
+    }
+    
+    if (tipo === 'RegistroManutenzione') {
+      if (!form.dataIntervento) issues.push('❌ Data intervento obbligatoria');
+      if (!form.tipoIntervento) issues.push('❌ Tipo intervento obbligatorio');
+      if (!form.tecnico) issues.push('❌ Tecnico operatore obbligatorio');
+    }
+    
+    if (tipo === 'SchedaVerificaElettrica') {
+      if (!form.resistenzaTerra && form.resistenzaTerra !== 0) {
+        issues.push('⚠️ Resistenza di terra non misurata');
+      }
+      if (!form.isolamento && form.isolamento !== 0) {
+        issues.push('⚠️ Resistenza isolamento non misurata');
+      }
+    }
+    
+    if (tipo === 'SchedaGas' || tipo === 'DichiarazioneGas') {
+      if (!form.pressioneProva) issues.push('⚠️ Pressione prova tenuta non indicata');
+      if (form.provaSuperata === false) {
+        issues.push('❌ Prova di tenuta NON superata: impianto con perdite!');
+      }
+    }
+    
+    // Verifica stato
+    if (stato === 'firmata' && Object.keys(form).length < 3) {
+      issues.push('⚠️ Scheda con pochi dati compilati, verificare prima di firmare');
+    }
+    
+    return { valid: issues.filter(i => i.startsWith('❌')).length === 0, issues };
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const check = checkSchedaConformita();
+    if (!check.valid) {
+      const confirmed = confirm(
+        'Problemi di conformità rilevati:\n\n' + 
+        check.issues.join('\n') + 
+        '\n\nVuoi procedere comunque?'
+      );
+      if (!confirmed) return;
+    }
+    
     onSave({
       numero,
       tipo,
@@ -486,17 +551,47 @@ export default function SchedaForm({ scheda, clienti, impianti, onSave, onCancel
             rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg" />
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <button type="button" onClick={onCancel}
-            className="px-6 py-2.5 text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg">
-            Annulla
-          </button>
-          <button type="submit"
-            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-200">
-            <i className="fas fa-save mr-2"></i>
-            {scheda ? 'Aggiorna' : 'Salva'}
-          </button>
+        {/* Verifica Conformità */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+            <i className="fas fa-shield-alt text-green-500"></i>
+            Verifica Conformità Scheda
+          </h2>
+          {(() => {
+            const check = checkSchedaConformita();
+            return (
+              <div className="space-y-2">
+                {check.issues.length === 0 ? (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <i className="fas fa-check-circle text-green-600"></i>
+                    <span className="text-green-800 font-medium">Tutti i controlli di conformità superati</span>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {check.issues.map((issue, i) => (
+                      <div key={i} className={`flex items-start gap-2 p-2 rounded-lg text-sm ${
+                        issue.startsWith('❌') ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}>
+                        <span>{issue}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onCancel}
+              className="px-6 py-2.5 text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg">
+              Annulla
+            </button>
+            <button type="submit"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-200">
+              <i className="fas fa-save mr-2"></i>
+              {scheda ? 'Aggiorna' : 'Salva'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

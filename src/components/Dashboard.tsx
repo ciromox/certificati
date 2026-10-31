@@ -102,6 +102,120 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
         </div>
       </div>
 
+      {/* Pannello Verifica Conformità */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+          <i className="fas fa-shield-alt text-green-500"></i>
+          Verifica Conformità Sistema
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Verifica Tecnico */}
+          <div className={`p-3 rounded-lg border ${data.tecnico ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-center gap-2">
+              <i className={`fas ${data.tecnico ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600'}`}></i>
+              <span className="font-medium text-sm">Dati Tecnico</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              {data.tecnico ? 'Configurato correttamente' : 'Da configurare'}
+            </p>
+          </div>
+
+          {/* Verifica Clienti */}
+          <div className={`p-3 rounded-lg border ${clienti.length > 0 ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-center gap-2">
+              <i className={`fas ${clienti.length > 0 ? 'fa-check-circle text-green-600' : 'fa-info-circle text-amber-600'}`}></i>
+              <span className="font-medium text-sm">Clienti</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              {clienti.length} clienti registrati
+            </p>
+          </div>
+
+          {/* Verifica Impianti */}
+          <div className={`p-3 rounded-lg border ${impianti.length > 0 ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-center gap-2">
+              <i className={`fas ${impianti.length > 0 ? 'fa-check-circle text-green-600' : 'fa-info-circle text-amber-600'}`}></i>
+              <span className="font-medium text-sm">Impianti</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              {impianti.length} impianti registrati
+            </p>
+          </div>
+
+          {/* Verifica Certificati */}
+          <div className={`p-3 rounded-lg border ${certificatiAttivi.length > 0 ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+            <div className="flex items-center gap-2">
+              <i className={`fas ${certificatiAttivi.length > 0 ? 'fa-check-circle text-green-600' : 'fa-info-circle text-amber-600'}`}></i>
+              <span className="font-medium text-sm">Certificati Emessi</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              {certificatiAttivi.length} certificati attivi
+            </p>
+          </div>
+        </div>
+
+        {/* Avvisi */}
+        {certificatiScaduti.length > 0 && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <i className="fas fa-exclamation-triangle text-red-600 mt-0.5"></i>
+              <div>
+                <p className="font-medium text-red-800 text-sm">Attenzione: Certificati Scaduti</p>
+                <p className="text-xs text-red-700 mt-1">
+                  Ci sono {certificatiScaduti.length} certificati scaduti che richiedono rinnovo o verifica
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {certificatiBozza.length > 0 && (
+          <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <i className="fas fa-info-circle text-amber-600 mt-0.5"></i>
+              <div>
+                <p className="font-medium text-amber-800 text-sm">Certificati in Bozza</p>
+                <p className="text-xs text-amber-700 mt-1">
+                  Ci sono {certificatiBozza.length} certificati in bozza da completare ed emettere
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Scadenze imminenti */}
+        {(() => {
+          const oggi = new Date();
+          const tra30Giorni = new Date(oggi.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const inScadenza = certificati.filter(c => {
+            if (!c.dataValidita) return false;
+            const scadenza = new Date(c.dataValidita);
+            return scadenza >= oggi && scadenza <= tra30Giorni && c.stato === 'emesso';
+          });
+          
+          if (inScadenza.length === 0) return null;
+          
+          return (
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <i className="fas fa-clock text-orange-600 mt-0.5"></i>
+                <div className="flex-1">
+                  <p className="font-medium text-orange-800 text-sm">Scadenze Imminenti (30 giorni)</p>
+                  <ul className="mt-1 ml-4 list-disc text-xs text-orange-700 space-y-0.5">
+                    {inScadenza.slice(0, 3).map(c => (
+                      <li key={c.id}>
+                        {c.numero} - Scade il {new Date(c.dataValidita!).toLocaleDateString('it-IT')}
+                      </li>
+                    ))}
+                    {inScadenza.length > 3 && <li>...e altri {inScadenza.length - 3}</li>}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Recent Certificates */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">

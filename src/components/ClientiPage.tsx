@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Cliente } from '../types';
+import { validateCodiceFiscale, validatePartitaIva, validateCAP, validateProvincia, validateEmail, validateTelefono, ValidationResult } from '../validators';
+import ValidationMessages from './ValidationMessages';
 
 interface ClientiPageProps {
   clienti: Cliente[];
@@ -19,9 +21,69 @@ export default function ClientiPage({ clienti, onAdd, onUpdate, onDelete }: Clie
   const [form, setForm] = useState(emptyForm);
   const [search, setSearch] = useState('');
   const [showDetail, setShowDetail] = useState<Cliente | null>(null);
+  
+  // Validazioni in tempo reale
+  const [validations, setValidations] = useState<{
+    codiceFiscale: ValidationResult;
+    partitaIva: ValidationResult;
+    cap: ValidationResult;
+    provincia: ValidationResult;
+    email: ValidationResult;
+    telefono: ValidationResult;
+  }>({
+    codiceFiscale: { valid: true, errors: [], warnings: [] },
+    partitaIva: { valid: true, errors: [], warnings: [] },
+    cap: { valid: true, errors: [], warnings: [] },
+    provincia: { valid: true, errors: [], warnings: [] },
+    email: { valid: true, errors: [], warnings: [] },
+    telefono: { valid: true, errors: [], warnings: [] },
+  });
+  
+  // Aggiorna validazioni quando cambia il form
+  const updateValidation = (field: keyof typeof validations, value: string) => {
+    let result: ValidationResult;
+    switch (field) {
+      case 'codiceFiscale':
+        result = validateCodiceFiscale(value);
+        break;
+      case 'partitaIva':
+        result = validatePartitaIva(value);
+        break;
+      case 'cap':
+        result = validateCAP(value);
+        break;
+      case 'provincia':
+        result = validateProvincia(value);
+        break;
+      case 'email':
+        result = validateEmail(value);
+        break;
+      case 'telefono':
+        result = validateTelefono(value);
+        break;
+      default:
+        result = { valid: true, errors: [], warnings: [] };
+    }
+    setValidations(prev => ({ ...prev, [field]: result }));
+  };
+  
+  const isFormValid = () => {
+    return validations.codiceFiscale.valid &&
+           validations.partitaIva.valid &&
+           validations.cap.valid &&
+           validations.provincia.valid &&
+           validations.email.valid &&
+           validations.telefono.valid &&
+           form.nome && form.cognome && form.codiceFiscale && 
+           form.indirizzo && form.citta && form.cap && form.provincia;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid()) {
+      alert('Correggi gli errori nei campi prima di salvare');
+      return;
+    }
     if (editing) {
       onUpdate({ ...editing, ...form });
     } else {
@@ -107,13 +169,35 @@ export default function ClientiPage({ clienti, onAdd, onUpdate, onDelete }: Clie
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Codice Fiscale *</label>
-                  <input required type="text" value={form.codiceFiscale} onChange={e => setForm({...form, codiceFiscale: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input required type="text" value={form.codiceFiscale} 
+                    onChange={e => {
+                      const val = e.target.value.toUpperCase();
+                      setForm({...form, codiceFiscale: val});
+                      updateValidation('codiceFiscale', val);
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      form.codiceFiscale && !validations.codiceFiscale.valid ? 'border-red-400 bg-red-50' : 
+                      form.codiceFiscale && validations.codiceFiscale.warnings.length > 0 ? 'border-amber-400 bg-amber-50' :
+                      'border-gray-200'
+                    }`}
+                    placeholder="16 caratteri alfanumerici" />
+                  {form.codiceFiscale && <ValidationMessages validation={validations.codiceFiscale} compact />}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label>
-                  <input type="text" value={form.partitaIva} onChange={e => setForm({...form, partitaIva: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input type="text" value={form.partitaIva} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      setForm({...form, partitaIva: val});
+                      if (val) updateValidation('partitaIva', val);
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      form.partitaIva && !validations.partitaIva.valid ? 'border-red-400 bg-red-50' : 
+                      form.partitaIva && validations.partitaIva.warnings.length > 0 ? 'border-amber-400 bg-amber-50' :
+                      'border-gray-200'
+                    }`}
+                    placeholder="11 cifre (opzionale)" />
+                  {form.partitaIva && <ValidationMessages validation={validations.partitaIva} compact />}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Indirizzo *</label>
@@ -128,24 +212,60 @@ export default function ClientiPage({ clienti, onAdd, onUpdate, onDelete }: Clie
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">CAP *</label>
-                    <input required type="text" value={form.cap} onChange={e => setForm({...form, cap: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <input required type="text" maxLength={5} value={form.cap} 
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setForm({...form, cap: val});
+                        updateValidation('cap', val);
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        form.cap && !validations.cap.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                      }`}
+                      placeholder="5 cifre" />
+                    {form.cap && <ValidationMessages validation={validations.cap} compact />}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Provincia *</label>
-                    <input required type="text" maxLength={2} value={form.provincia} onChange={e => setForm({...form, provincia: e.target.value.toUpperCase()})}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <input required type="text" maxLength={2} value={form.provincia} 
+                      onChange={e => {
+                        const val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                        setForm({...form, provincia: val});
+                        updateValidation('provincia', val);
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                        form.provincia && !validations.provincia.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                      }`}
+                      placeholder="Es: RM" />
+                    {form.provincia && <ValidationMessages validation={validations.provincia} compact />}
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
-                  <input type="tel" value={form.telefono} onChange={e => setForm({...form, telefono: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input type="tel" value={form.telefono} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      setForm({...form, telefono: val});
+                      if (val) updateValidation('telefono', val);
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      form.telefono && !validations.telefono.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                    }`}
+                    placeholder="Es: +39 06 1234567" />
+                  {form.telefono && <ValidationMessages validation={validations.telefono} compact />}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  <input type="email" value={form.email} 
+                    onChange={e => {
+                      const val = e.target.value;
+                      setForm({...form, email: val});
+                      if (val) updateValidation('email', val);
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      form.email && !validations.email.valid ? 'border-red-400 bg-red-50' : 'border-gray-200'
+                    }`}
+                    placeholder="email@esempio.it" />
+                  {form.email && <ValidationMessages validation={validations.email} compact />}
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">

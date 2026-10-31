@@ -56,6 +56,24 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
     return styles[stato] || 'bg-gray-100 text-gray-800';
   };
 
+  // Verifica validità certificato
+  const checkValidita = (cert: Certificato) => {
+    if (!cert.dataValidita) return { valida: true, giorni: null, label: 'Nessuna scadenza' };
+    
+    const oggi = new Date();
+    const scadenza = new Date(cert.dataValidita);
+    const diffTime = scadenza.getTime() - oggi.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      return { valida: false, giorni: diffDays, label: `Scaduto da ${Math.abs(diffDays)} giorni` };
+    } else if (diffDays <= 30) {
+      return { valida: true, giorni: diffDays, label: `Scade tra ${diffDays} giorni` };
+    } else {
+      return { valida: true, giorni: diffDays, label: `Valido per ${diffDays} giorni` };
+    }
+  };
+
   const filtered = certificati.filter(c => {
     const matchSearch = `${c.numero} ${getClienteNome(c.clienteId)}`.toLowerCase().includes(search.toLowerCase());
     const matchTipo = !filterTipo || c.tipo === filterTipo;
@@ -138,6 +156,19 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
                       <i className="fas fa-calendar mr-1"></i>
                       Rilasciato: {new Date(cert.dataRilascio).toLocaleDateString('it-IT')}
                     </p>
+                    {cert.dataValidita && (() => {
+                      const validita = checkValidita(cert);
+                      return (
+                        <p className={`text-xs mt-0.5 font-medium ${
+                          !validita.valida ? 'text-red-600' : 
+                          validita.giorni !== null && validita.giorni <= 30 ? 'text-amber-600' : 
+                          'text-green-600'
+                        }`}>
+                          <i className={`fas ${!validita.valida ? 'fa-times-circle' : validita.giorni !== null && validita.giorni <= 30 ? 'fa-exclamation-triangle' : 'fa-check-circle'} mr-1`}></i>
+                          {validita.label}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
