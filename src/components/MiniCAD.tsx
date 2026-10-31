@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 
 export interface CadElement {
   id: string;
-  type: 'line' | 'rect' | 'circle' | 'text' | 'symbol' | 'wall';
+  type: 'line' | 'rect' | 'circle' | 'text' | 'symbol' | 'wall' | 'connector' | 'dimension' | 'block';
   x: number;
   y: number;
   x2?: number;
@@ -17,6 +17,12 @@ export interface CadElement {
   lineWidth: number;
   locked?: boolean;
   layer?: string;
+  // Per connettori
+  fromId?: string;
+  toId?: string;
+  // Per blocchi
+  blockType?: string;
+  elements?: CadElement[];
 }
 
 export interface MiniCADProps {
@@ -27,48 +33,48 @@ export interface MiniCADProps {
 }
 
 export const SIMBOLI_ELETTRICI = [
-  { id: 'presa', label: 'Presa', icon: '⏚' },
-  { id: 'presa_doppia', label: 'Presa Doppia', icon: '⏚⏚' },
-  { id: 'interruttore', label: 'Interruttore', icon: '⏻' },
-  { id: 'deviatore', label: 'Deviatore', icon: '⎊' },
-  { id: 'pulsante', label: 'Pulsante', icon: '◉' },
-  { id: 'lampada', label: 'Punto Luce', icon: '💡' },
-  { id: 'lampada_parete', label: 'Applique', icon: '🔆' },
-  { id: 'quadro', label: 'Quadro Elettrico', icon: '▣' },
-  { id: 'differenziale', label: 'Differenziale', icon: '⊿' },
-  { id: 'magnetotermico', label: 'Magnetotermico', icon: '⏏' },
-  { id: 'scatola_der', label: 'Scatola Derivazione', icon: '⬜' },
-  { id: 'termostato', label: 'Termostato', icon: '🌡' },
-  { id: 'citofono', label: 'Citofono', icon: '📞' },
-  { id: 'antenna', label: 'Presa TV', icon: '📺' },
-  { id: 'rilevatore', label: 'Rilevatore', icon: '⚠' },
-  { id: 'sirena', label: 'Sirena', icon: '🔔' },
+  { id: 'presa', label: 'Presa', icon: '⏚', connectors: ['top', 'bottom'] },
+  { id: 'presa_doppia', label: 'Presa Doppia', icon: '⏚⏚', connectors: ['top', 'bottom'] },
+  { id: 'interruttore', label: 'Interruttore', icon: '⏻', connectors: ['left', 'right'] },
+  { id: 'deviatore', label: 'Deviatore', icon: '⎊', connectors: ['left', 'right', 'top'] },
+  { id: 'pulsante', label: 'Pulsante', icon: '◉', connectors: ['left', 'right'] },
+  { id: 'lampada', label: 'Punto Luce', icon: '💡', connectors: ['top'] },
+  { id: 'lampada_parete', label: 'Applique', icon: '🔆', connectors: ['bottom'] },
+  { id: 'quadro', label: 'Quadro Elettrico', icon: '▣', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'differenziale', label: 'Differenziale', icon: '⊿', connectors: ['left', 'right'] },
+  { id: 'magnetotermico', label: 'Magnetotermico', icon: '⏏', connectors: ['left', 'right'] },
+  { id: 'scatola_der', label: 'Scatola Derivazione', icon: '⬜', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'termostato', label: 'Termostato', icon: '🌡', connectors: ['bottom'] },
+  { id: 'citofono', label: 'Citofono', icon: '📞', connectors: ['bottom'] },
+  { id: 'antenna', label: 'Presa TV', icon: '📺', connectors: ['bottom'] },
+  { id: 'rilevatore', label: 'Rilevatore', icon: '⚠', connectors: ['bottom'] },
+  { id: 'sirena', label: 'Sirena', icon: '🔔', connectors: ['bottom'] },
 ];
 
 export const SIMBOLI_IDRAULICI = [
-  { id: 'rubinetto', label: 'Rubinetto', icon: '🚰' },
-  { id: 'lavabo', label: 'Lavabo', icon: '🚿' },
-  { id: 'wc', label: 'WC', icon: '🚽' },
-  { id: 'bidet', label: 'Bidet', icon: '🚿' },
-  { id: 'vasca', label: 'Vasca', icon: '🛁' },
-  { id: 'piatto_doccia', label: 'Piatto Doccia', icon: '🚿' },
-  { id: 'lavello', label: 'Lavello', icon: '🍽' },
-  { id: 'lavatrice', label: 'Lavatrice', icon: '🧺' },
-  { id: 'lavastoviglie', label: 'Lavastoviglie', icon: '🍴' },
-  { id: 'caldaia', label: 'Caldaia', icon: '🔥' },
-  { id: 'radiatore', label: 'Radiatore', icon: '🌡' },
-  { id: 'valvola', label: 'Valvola', icon: '⊗' },
-  { id: 'contatore', label: 'Contatore', icon: '⏱' },
+  { id: 'rubinetto', label: 'Rubinetto', icon: '🚰', connectors: ['bottom'] },
+  { id: 'lavabo', label: 'Lavabo', icon: '🚿', connectors: ['bottom', 'left', 'right'] },
+  { id: 'wc', label: 'WC', icon: '🚽', connectors: ['bottom'] },
+  { id: 'bidet', label: 'Bidet', icon: '🚿', connectors: ['bottom'] },
+  { id: 'vasca', label: 'Vasca', icon: '🛁', connectors: ['left', 'right'] },
+  { id: 'piatto_doccia', label: 'Piatto Doccia', icon: '🚿', connectors: ['bottom'] },
+  { id: 'lavello', label: 'Lavello', icon: '🍽', connectors: ['bottom', 'left', 'right'] },
+  { id: 'lavatrice', label: 'Lavatrice', icon: '🧺', connectors: ['top'] },
+  { id: 'lavastoviglie', label: 'Lavastoviglie', icon: '🍴', connectors: ['top'] },
+  { id: 'caldaia', label: 'Caldaia', icon: '🔥', connectors: ['left', 'right', 'bottom'] },
+  { id: 'radiatore', label: 'Radiatore', icon: '🌡', connectors: ['left', 'right'] },
+  { id: 'valvola', label: 'Valvola', icon: '⊗', connectors: ['left', 'right'] },
+  { id: 'contatore', label: 'Contatore', icon: '⏱', connectors: ['left', 'right'] },
 ];
 
 export const SIMBOLI_ARCHITETTONICI = [
-  { id: 'porta', label: 'Porta', icon: '🚪' },
-  { id: 'finestra', label: 'Finestra', icon: '🪟' },
-  { id: 'scala', label: 'Scala', icon: '🪜' },
-  { id: 'ascensore', label: 'Ascensore', icon: '🛗' },
+  { id: 'porta', label: 'Porta', icon: '🚪', connectors: ['left', 'right'] },
+  { id: 'finestra', label: 'Finestra', icon: '🪟', connectors: ['left', 'right'] },
+  { id: 'scala', label: 'Scala', icon: '🪜', connectors: ['top', 'bottom'] },
+  { id: 'ascensore', label: 'Ascensore', icon: '🛗', connectors: ['left', 'right', 'top', 'bottom'] },
 ];
 
-type Tool = 'select' | 'line' | 'rect' | 'circle' | 'text' | 'symbol' | 'wall' | 'door' | 'window' | 'pan' | 'measure';
+type Tool = 'select' | 'line' | 'rect' | 'circle' | 'text' | 'symbol' | 'wall' | 'door' | 'window' | 'pan' | 'measure' | 'connector' | 'dimension' | 'align' | 'rotate' | 'mirror';
 
 export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: MiniCADProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,7 +82,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   
   const [tool, setTool] = useState<Tool>('select');
   const [selectedSymbol, setSelectedSymbol] = useState<string>('presa');
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
+  const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const [drawing, setDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState<{x: number, y: number} | null>(null);
   const [mousePos, setMousePos] = useState<{x: number, y: number}>({x: 0, y: 0});
@@ -102,6 +108,9 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   const [undoStack, setUndoStack] = useState<CadElement[][]>([]);
   const [redoStack, setRedoStack] = useState<CadElement[][]>([]);
   const [measuring, setMeasuring] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
+  const [clipboard, setClipboard] = useState<CadElement[]>([]);
+  const [autoConnect, setAutoConnect] = useState(true);
+  const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
 
   // Salva stato per undo
   const saveState = useCallback(() => {
@@ -127,18 +136,188 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     onChange(nextState);
   };
 
+  // Copia elementi selezionati
+  const copySelected = () => {
+    const selected = elementi.filter(e => selectedElements.includes(e.id));
+    setClipboard(selected);
+  };
+
+  // Incolla elementi
+  const pasteElements = () => {
+    if (clipboard.length === 0) return;
+    saveState();
+    const newElements = clipboard.map(e => ({
+      ...e,
+      id: Date.now().toString() + Math.random(),
+      x: e.x + 50,
+      y: e.y + 50,
+      x2: e.x2 ? e.x2 + 50 : undefined,
+      y2: e.y2 ? e.y2 + 50 : undefined,
+    }));
+    onChange([...elementi, ...newElements]);
+    setSelectedElements(newElements.map(e => e.id));
+  };
+
+  // Elimina elementi selezionati
+  const deleteSelected = () => {
+    if (selectedElements.length === 0) return;
+    saveState();
+    onChange(elementi.filter(e => !selectedElements.includes(e.id)));
+    setSelectedElements([]);
+  };
+
+  // Ruota elementi selezionati
+  const rotateSelected = (degrees: number) => {
+    if (selectedElements.length === 0) return;
+    saveState();
+    const updated = elementi.map(e => {
+      if (!selectedElements.includes(e.id)) return e;
+      return { ...e, rotation: ((e.rotation || 0) + degrees) % 360 };
+    });
+    onChange(updated);
+  };
+
+  // Specchia elementi selezionati
+  const mirrorSelected = (direction: 'horizontal' | 'vertical') => {
+    if (selectedElements.length === 0) return;
+    saveState();
+    const updated = elementi.map(e => {
+      if (!selectedElements.includes(e.id)) return e;
+      if (direction === 'horizontal') {
+        return { ...e, x: -e.x, rotation: e.rotation ? 180 - e.rotation : 180 };
+      } else {
+        return { ...e, y: -e.y, rotation: e.rotation ? -e.rotation : 0 };
+      }
+    });
+    onChange(updated);
+  };
+
+  // Allinea elementi selezionati
+  const alignSelected = (alignment: 'left' | 'right' | 'top' | 'bottom' | 'center-h' | 'center-v') => {
+    if (selectedElements.length < 2) return;
+    saveState();
+    const selected = elementi.filter(e => selectedElements.includes(e.id));
+    
+    let targetValue = 0;
+    switch (alignment) {
+      case 'left':
+        targetValue = Math.min(...selected.map(e => e.x));
+        break;
+      case 'right':
+        targetValue = Math.max(...selected.map(e => e.x + (e.width || 40)));
+        break;
+      case 'top':
+        targetValue = Math.min(...selected.map(e => e.y));
+        break;
+      case 'bottom':
+        targetValue = Math.max(...selected.map(e => e.y + (e.height || 40)));
+        break;
+      case 'center-h':
+        const minX = Math.min(...selected.map(e => e.x));
+        const maxX = Math.max(...selected.map(e => e.x + (e.width || 40)));
+        targetValue = (minX + maxX) / 2;
+        break;
+      case 'center-v':
+        const minY = Math.min(...selected.map(e => e.y));
+        const maxY = Math.max(...selected.map(e => e.y + (e.height || 40)));
+        targetValue = (minY + maxY) / 2;
+        break;
+    }
+
+    const updated = elementi.map(e => {
+      if (!selectedElements.includes(e.id)) return e;
+      switch (alignment) {
+        case 'left':
+        case 'right':
+        case 'center-h':
+          return { ...e, x: targetValue };
+        case 'top':
+        case 'bottom':
+        case 'center-v':
+          return { ...e, y: targetValue };
+        default:
+          return e;
+      }
+    });
+    onChange(updated);
+  };
+
+  // Crea connettore automatico tra due elementi
+  const createAutoConnector = (fromId: string, toId: string) => {
+    const fromEl = elementi.find(e => e.id === fromId);
+    const toEl = elementi.find(e => e.id === toId);
+    if (!fromEl || !toEl) return;
+
+    saveState();
+    const connector: CadElement = {
+      id: Date.now().toString(),
+      type: 'connector',
+      x: fromEl.x,
+      y: fromEl.y,
+      x2: toEl.x,
+      y2: toEl.y,
+      color: '#1e40af',
+      lineWidth: 2,
+      layer: activeLayer,
+      fromId,
+      toId,
+    };
+    onChange([...elementi, connector]);
+  };
+
+  // Trova punto di connessione più vicino
+  const findNearestConnector = (x: number, y: number, excludeId?: string) => {
+    let nearest: { id: string; x: number; y: number; distance: number } | null = null;
+    
+    elementi.forEach(el => {
+      if (el.id === excludeId) return;
+      if (el.type !== 'symbol') return;
+      
+      const simbolo = [...SIMBOLI_ELETTRICI, ...SIMBOLI_IDRAULICI, ...SIMBOLI_ARCHITETTONICI].find(s => s.id === el.symbolType);
+      if (!simbolo) return;
+
+      // Calcola punti di connessione basati sui connettori del simbolo
+      simbolo.connectors.forEach(conn => {
+        let connX = el.x;
+        let connY = el.y;
+        
+        switch (conn) {
+          case 'top': connY -= 20; break;
+          case 'bottom': connY += 20; break;
+          case 'left': connX -= 20; break;
+          case 'right': connX += 20; break;
+        }
+
+        const distance = Math.sqrt(Math.pow(x - connX, 2) + Math.pow(y - connY, 2));
+        if (!nearest || distance < nearest.distance) {
+          nearest = { id: el.id, x: connX, y: connY, distance };
+        }
+      });
+    });
+
+    return nearest;
+  };
+
+  // Snap to grid
+  const snap = (value: number) => {
+    if (!snapToGrid) return value;
+    return Math.round(value / gridSize) * gridSize;
+  };
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z') { e.preventDefault(); undo(); }
         if (e.key === 'y') { e.preventDefault(); redo(); }
+        if (e.key === 'c') { e.preventDefault(); copySelected(); }
+        if (e.key === 'v') { e.preventDefault(); pasteElements(); }
       }
-      if (e.key === 'Delete' && selectedElement) {
+      if (e.key === 'Delete' && selectedElements.length > 0) {
         deleteSelected();
       }
       if (e.key === 'Escape') {
-        setSelectedElement(null);
+        setSelectedElements([]);
         setDrawing(false);
       }
       // Tool shortcuts
@@ -150,16 +329,12 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       if (e.key === 's' || e.key === 'S') setTool('symbol');
       if (e.key === 'w' || e.key === 'W') setTool('wall');
       if (e.key === 'm' || e.key === 'M') setTool('measure');
+      if (e.key === 'n' || e.key === 'N') setTool('connector');
+      if (e.key === 'd' || e.key === 'D') setTool('dimension');
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedElement, undoStack, redoStack, elementi]);
-
-  // Snap to grid
-  const snap = (value: number) => {
-    if (!snapToGrid) return value;
-    return Math.round(value / gridSize) * gridSize;
-  };
+  }, [selectedElements, undoStack, redoStack, elementi, clipboard]);
 
   // Disegna il canvas
   useEffect(() => {
@@ -196,6 +371,13 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       const layer = layers.find(l => l.id === el.layer);
       if (layer && !layer.visible) return;
 
+      ctx.save();
+      ctx.translate(el.x, el.y);
+      if (el.rotation) {
+        ctx.rotate((el.rotation * Math.PI) / 180);
+      }
+      ctx.translate(-el.x, -el.y);
+
       ctx.strokeStyle = el.color;
       ctx.fillStyle = el.color;
       ctx.lineWidth = el.lineWidth;
@@ -222,6 +404,24 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
           ctx.font = `${10 / zoom}px sans-serif`;
           ctx.fillStyle = '#374151';
           ctx.fillText(simbolo.label, el.x - 20 / zoom, el.y + 24 / zoom);
+
+          // Disegna punti di connessione se autoConnect è attivo
+          if (autoConnect) {
+            ctx.fillStyle = '#10b981';
+            simbolo.connectors.forEach(conn => {
+              let connX = el.x;
+              let connY = el.y;
+              switch (conn) {
+                case 'top': connY -= 20; break;
+                case 'bottom': connY += 20; break;
+                case 'left': connX -= 20; break;
+                case 'right': connX += 20; break;
+              }
+              ctx.beginPath();
+              ctx.arc(connX, connY, 3 / zoom, 0, Math.PI * 2);
+              ctx.fill();
+            });
+          }
         }
       } else if (el.type === 'wall') {
         ctx.lineWidth = el.lineWidth * 2;
@@ -229,14 +429,38 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
         ctx.moveTo(el.x, el.y);
         ctx.lineTo(el.x2!, el.y2!);
         ctx.stroke();
+      } else if (el.type === 'connector') {
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(el.x, el.y);
+        ctx.lineTo(el.x2!, el.y2!);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else if (el.type === 'dimension') {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(el.x, el.y);
+        ctx.lineTo(el.x2!, el.y2!);
+        ctx.stroke();
+        
+        // Etichetta dimensione
+        const dist = Math.sqrt(Math.pow(el.x2! - el.x, 2) + Math.pow(el.y2! - el.y, 2));
+        const midX = (el.x + el.x2!) / 2;
+        const midY = (el.y + el.y2!) / 2;
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = `${12 / zoom}px sans-serif`;
+        ctx.fillText(`${dist.toFixed(0)}`, midX + 10, midY - 10);
       }
 
       // Selezione
-      if (el.id === selectedElement) {
+      if (selectedElements.includes(el.id)) {
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 1 / zoom;
         ctx.setLineDash([5 / zoom, 5 / zoom]);
-        if (el.type === 'line' || el.type === 'wall') {
+        if (el.type === 'line' || el.type === 'wall' || el.type === 'connector' || el.type === 'dimension') {
           ctx.strokeRect(
             Math.min(el.x, el.x2!) - 5,
             Math.min(el.y, el.y2!) - 5,
@@ -248,11 +472,27 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
         } else if (el.type === 'circle') {
           ctx.strokeRect(el.x - el.radius! - 5, el.y - el.radius! - 5, el.radius! * 2 + 10, el.radius! * 2 + 10);
         } else {
-          ctx.strokeRect(el.x - 5, el.y - 20, 40, 30);
+          ctx.strokeRect(el.x - 25, el.y - 25, 50, 50);
         }
         ctx.setLineDash([]);
       }
+
+      ctx.restore();
     });
+
+    // Selection box
+    if (selectionBox) {
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 1 / zoom;
+      ctx.setLineDash([5 / zoom, 5 / zoom]);
+      ctx.strokeRect(
+        selectionBox.start.x,
+        selectionBox.start.y,
+        selectionBox.end.x - selectionBox.start.x,
+        selectionBox.end.y - selectionBox.start.y
+      );
+      ctx.setLineDash([]);
+    }
 
     // Misurazione
     if (measuring) {
@@ -265,7 +505,6 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       ctx.stroke();
       ctx.setLineDash([]);
       
-      // Calcola distanza
       const dist = Math.sqrt(Math.pow(measuring.end.x - measuring.start.x, 2) + Math.pow(measuring.end.y - measuring.start.y, 2));
       const midX = (measuring.start.x + measuring.end.x) / 2;
       const midY = (measuring.start.y + measuring.end.y) / 2;
@@ -280,7 +519,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth / zoom;
       ctx.setLineDash([3 / zoom, 3 / zoom]);
-      if (tool === 'line' || tool === 'wall') {
+      if (tool === 'line' || tool === 'wall' || tool === 'connector' || tool === 'dimension') {
         ctx.beginPath();
         ctx.moveTo(startPoint.x, startPoint.y);
         ctx.lineTo(mousePos.x, mousePos.y);
@@ -297,7 +536,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     }
 
     ctx.restore();
-  }, [elementi, selectedElement, drawing, startPoint, mousePos, color, lineWidth, panOffset, zoom, showGrid, gridSize, tool, measuring, layers]);
+  }, [elementi, selectedElements, drawing, startPoint, mousePos, color, lineWidth, panOffset, zoom, showGrid, gridSize, tool, measuring, layers, autoConnect, selectionBox]);
 
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current!;
@@ -315,7 +554,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     
     if (tool === 'select') {
       const clicked = [...elementi].reverse().find(el => {
-        if (el.type === 'line' || el.type === 'wall') {
+        if (el.type === 'line' || el.type === 'wall' || el.type === 'connector' || el.type === 'dimension') {
           const dist = Math.abs((el.y2! - el.y) * coords.x - (el.x2! - el.x) * coords.y + el.x2! * el.y - el.y2! * el.x) /
             Math.sqrt(Math.pow(el.y2! - el.y, 2) + Math.pow(el.x2! - el.x, 2));
           return dist < 10 && 
@@ -329,16 +568,27 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
         } else if (el.type === 'circle') {
           return Math.sqrt(Math.pow(coords.x - el.x, 2) + Math.pow(coords.y - el.y, 2)) <= el.radius!;
         } else {
-          return Math.abs(coords.x - el.x) < 20 && Math.abs(coords.y - el.y) < 20;
+          return Math.abs(coords.x - el.x) < 25 && Math.abs(coords.y - el.y) < 25;
         }
       });
       
       if (clicked) {
-        setSelectedElement(clicked.id);
+        if (e.shiftKey) {
+          // Selezione multipla
+          setSelectedElements(prev => 
+            prev.includes(clicked.id) 
+              ? prev.filter(id => id !== clicked.id)
+              : [...prev, clicked.id]
+          );
+        } else {
+          setSelectedElements([clicked.id]);
+        }
         setDragging(true);
         setDragOffset({ x: coords.x - clicked.x, y: coords.y - clicked.y });
       } else {
-        setSelectedElement(null);
+        setSelectedElements([]);
+        // Inizia selection box
+        setSelectionBox({ start: coords, end: coords });
       }
     } else if (tool === 'pan') {
       setDragging(true);
@@ -390,27 +640,47 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       setMeasuring({ start: startPoint, end: coords });
     }
 
-    if (dragging && tool === 'select' && selectedElement) {
-      const el = elementi.find(e => e.id === selectedElement);
-      if (el) {
-        const dx = coords.x - dragOffset.x - el.x;
-        const dy = coords.y - dragOffset.y - el.y;
-        const updated = elementi.map(e => {
-          if (e.id !== selectedElement) return e;
-          if (e.type === 'line' || e.type === 'wall') {
-            return { ...e, x: e.x + dx, y: e.y + dy, x2: e.x2! + dx, y2: e.y2! + dy };
-          }
-          return { ...e, x: e.x + dx, y: e.y + dy };
-        });
-        onChange(updated);
-        setDragOffset({ x: coords.x - (el.x + dx), y: coords.y - (el.y + dy) });
-      }
+    if (selectionBox && tool === 'select') {
+      setSelectionBox({ ...selectionBox, end: coords });
+    }
+
+    if (dragging && tool === 'select' && selectedElements.length > 0) {
+      const dx = coords.x - dragOffset.x;
+      const dy = coords.y - dragOffset.y;
+      
+      const updated = elementi.map(e => {
+        if (!selectedElements.includes(e.id)) return e;
+        if (e.type === 'line' || e.type === 'wall' || e.type === 'connector' || e.type === 'dimension') {
+          return { ...e, x: e.x + dx, y: e.y + dy, x2: e.x2! + dx, y2: e.y2! + dy };
+        }
+        return { ...e, x: e.x + dx, y: e.y + dy };
+      });
+      onChange(updated);
+      setDragOffset({ x: coords.x - (elementi.find(e => e.id === selectedElements[0])?.x || 0), y: coords.y - (elementi.find(e => e.id === selectedElements[0])?.y || 0) });
     } else if (dragging && tool === 'pan') {
       setPanOffset({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
     }
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (tool === 'select' && selectionBox) {
+      // Seleziona elementi dentro il box
+      const box = selectionBox;
+      const minX = Math.min(box.start.x, box.end.x);
+      const maxX = Math.max(box.start.x, box.end.x);
+      const minY = Math.min(box.start.y, box.end.y);
+      const maxY = Math.max(box.start.y, box.end.y);
+
+      const selected = elementi.filter(el => {
+        return el.x >= minX && el.x <= maxX && el.y >= minY && el.y <= maxY;
+      }).map(el => el.id);
+
+      if (selected.length > 0) {
+        setSelectedElements(selected);
+      }
+      setSelectionBox(null);
+    }
+
     if (tool === 'measure') {
       setMeasuring(null);
       setDrawing(false);
@@ -449,6 +719,30 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
           lineWidth: 4,
           layer: 'walls',
         };
+      } else if (tool === 'connector') {
+        newEl = {
+          id: Date.now().toString(),
+          type: 'connector',
+          x: startPoint.x,
+          y: startPoint.y,
+          x2: coords.x,
+          y2: coords.y,
+          color: '#10b981',
+          lineWidth: 2,
+          layer: activeLayer,
+        };
+      } else if (tool === 'dimension') {
+        newEl = {
+          id: Date.now().toString(),
+          type: 'dimension',
+          x: startPoint.x,
+          y: startPoint.y,
+          x2: coords.x,
+          y2: coords.y,
+          color: '#f59e0b',
+          lineWidth: 1,
+          layer: activeLayer,
+        };
       } else if (tool === 'rect') {
         newEl = {
           id: Date.now().toString(),
@@ -484,19 +778,11 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     setDragging(false);
   };
 
-  const deleteSelected = () => {
-    if (selectedElement) {
-      saveState();
-      onChange(elementi.filter(e => e.id !== selectedElement));
-      setSelectedElement(null);
-    }
-  };
-
   const clearAll = () => {
     if (confirm('Sei sicuro di voler cancellare tutto lo schema?')) {
       saveState();
       onChange([]);
-      setSelectedElement(null);
+      setSelectedElements([]);
     }
   };
 
@@ -538,7 +824,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
             <i className="fas fa-drafting-compass text-2xl"></i>
             <div>
               <h2 className="font-bold text-lg">Mini CAD Professionale</h2>
-              <p className="text-blue-200 text-xs">Editor grafico per planimetrie e schemi unifilari</p>
+              <p className="text-blue-200 text-xs">Editor grafico con connettori automatici</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -567,6 +853,9 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
             <button onClick={() => setTool('wall')} className={`w-11 h-11 rounded-lg flex items-center justify-center transition ${tool === 'wall' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'}`} title="Muro (W)">
               <i className="fas fa-border-all"></i>
             </button>
+            <button onClick={() => setTool('connector')} className={`w-11 h-11 rounded-lg flex items-center justify-center transition ${tool === 'connector' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'}`} title="Connettore (N)">
+              <i className="fas fa-link"></i>
+            </button>
             <button onClick={() => setTool('rect')} className={`w-11 h-11 rounded-lg flex items-center justify-center transition ${tool === 'rect' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'}`} title="Rettangolo (R)">
               <i className="far fa-square"></i>
             </button>
@@ -582,6 +871,9 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
             <button onClick={() => setTool('measure')} className={`w-11 h-11 rounded-lg flex items-center justify-center transition ${tool === 'measure' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'}`} title="Misura (M)">
               <i className="fas fa-ruler"></i>
             </button>
+            <button onClick={() => setTool('dimension')} className={`w-11 h-11 rounded-lg flex items-center justify-center transition ${tool === 'dimension' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-200'}`} title="Quota (D)">
+              <i className="fas fa-arrows-alt-h"></i>
+            </button>
             <div className="w-8 h-px bg-gray-300 my-1"></div>
             <button onClick={undo} disabled={undoStack.length === 0} className="w-11 h-11 rounded-lg flex items-center justify-center bg-white text-gray-600 hover:bg-gray-200 transition disabled:opacity-40" title="Undo (Ctrl+Z)">
               <i className="fas fa-undo"></i>
@@ -589,7 +881,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
             <button onClick={redo} disabled={redoStack.length === 0} className="w-11 h-11 rounded-lg flex items-center justify-center bg-white text-gray-600 hover:bg-gray-200 transition disabled:opacity-40" title="Redo (Ctrl+Y)">
               <i className="fas fa-redo"></i>
             </button>
-            <button onClick={deleteSelected} disabled={!selectedElement} className="w-11 h-11 rounded-lg flex items-center justify-center bg-white text-red-600 hover:bg-red-50 transition disabled:opacity-40" title="Elimina (DEL)">
+            <button onClick={deleteSelected} disabled={selectedElements.length === 0} className="w-11 h-11 rounded-lg flex items-center justify-center bg-white text-red-600 hover:bg-red-50 transition disabled:opacity-40" title="Elimina (DEL)">
               <i className="fas fa-trash"></i>
             </button>
           </div>
@@ -630,7 +922,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
-              onMouseLeave={() => { setDrawing(false); setDragging(false); }}
+              onMouseLeave={() => { setDrawing(false); setDragging(false); setSelectionBox(null); }}
             />
             {/* Info bar */}
             <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white text-xs p-2 flex items-center justify-between">
@@ -639,6 +931,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
                 <span>Pos: ({Math.round(mousePos.x)}, {Math.round(mousePos.y)})</span>
                 <span>Zoom: {Math.round(zoom * 100)}%</span>
                 <span>Elementi: {elementi.length}</span>
+                <span>Selezionati: {selectedElements.length}</span>
                 <span>Layer: <strong>{activeLayer}</strong></span>
               </div>
               <div className="flex gap-2">
@@ -649,6 +942,10 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
                 <label className="flex items-center gap-1">
                   <input type="checkbox" checked={snapToGrid} onChange={(e) => setSnapToGrid(e.target.checked)} />
                   Snap
+                </label>
+                <label className="flex items-center gap-1">
+                  <input type="checkbox" checked={autoConnect} onChange={(e) => setAutoConnect(e.target.checked)} />
+                  Auto-Connect
                 </label>
               </div>
             </div>
@@ -673,6 +970,46 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
                 </div>
               </div>
             </div>
+
+            {selectedElements.length > 0 && (
+              <div>
+                <h3 className="font-bold text-sm text-gray-700 mb-2">Allinea</h3>
+                <div className="grid grid-cols-3 gap-1">
+                  <button onClick={() => alignSelected('left')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Allinea a sinistra">
+                    <i className="fas fa-align-left"></i>
+                  </button>
+                  <button onClick={() => alignSelected('center-h')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Centra orizzontalmente">
+                    <i className="fas fa-arrows-alt-h"></i>
+                  </button>
+                  <button onClick={() => alignSelected('right')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Allinea a destra">
+                    <i className="fas fa-align-right"></i>
+                  </button>
+                  <button onClick={() => alignSelected('top')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Allinea in alto">
+                    <i className="fas fa-align-up"></i>
+                  </button>
+                  <button onClick={() => alignSelected('center-v')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Centra verticalmente">
+                    <i className="fas fa-arrows-alt-v"></i>
+                  </button>
+                  <button onClick={() => alignSelected('bottom')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Allinea in basso">
+                    <i className="fas fa-align-down"></i>
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-1 mt-2">
+                  <button onClick={() => rotateSelected(90)} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Ruota 90°">
+                    <i className="fas fa-redo"></i> 90°
+                  </button>
+                  <button onClick={() => rotateSelected(-90)} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Ruota -90°">
+                    <i className="fas fa-undo"></i> -90°
+                  </button>
+                  <button onClick={() => mirrorSelected('horizontal')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Specchia orizzontale">
+                    <i className="fas fa-arrows-alt-h"></i>
+                  </button>
+                  <button onClick={() => mirrorSelected('vertical')} className="px-2 py-1 bg-white rounded text-xs hover:bg-gray-100" title="Specchia verticale">
+                    <i className="fas fa-arrows-alt-v"></i>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div>
               <h3 className="font-bold text-sm text-gray-700 mb-2">Layer</h3>
@@ -729,14 +1066,19 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
                 <p><kbd className="bg-gray-200 px-1 rounded">V</kbd> Seleziona</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">L</kbd> Linea</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">W</kbd> Muro</p>
+                <p><kbd className="bg-gray-200 px-1 rounded">N</kbd> Connettore</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">R</kbd> Rettangolo</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">C</kbd> Cerchio</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">T</kbd> Testo</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">S</kbd> Simbolo</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">M</kbd> Misura</p>
+                <p><kbd className="bg-gray-200 px-1 rounded">D</kbd> Quota</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">Ctrl+Z</kbd> Undo</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">Ctrl+Y</kbd> Redo</p>
+                <p><kbd className="bg-gray-200 px-1 rounded">Ctrl+C</kbd> Copia</p>
+                <p><kbd className="bg-gray-200 px-1 rounded">Ctrl+V</kbd> Incolla</p>
                 <p><kbd className="bg-gray-200 px-1 rounded">DEL</kbd> Elimina</p>
+                <p><kbd className="bg-gray-200 px-1 rounded">Shift+Click</kbd> Multi-selezione</p>
               </div>
             </div>
           </div>
