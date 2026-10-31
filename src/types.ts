@@ -54,6 +54,76 @@ export interface Certificato {
   dataRilascio: string;
   dataValidita?: string;
   stato: 'bozza' | 'emesso' | 'archiviato' | 'scaduto';
+  
+  // DATI DICHIARANTE (Ditta Installatrice)
+  dichiaranteNome: string;
+  dichiaranteCognome: string;
+  dichiaranteRuolo: 'titolare' | 'legale_rappresentante';
+  impresaRagioneSociale: string;
+  impresaSettore: string;
+  impresaSedeLegaleIndirizzo: string;
+  impresaSedeLegaleNumero: string;
+  impresaSedeLegaleComune: string;
+  impresaSedeLegaleProvincia: string;
+  impresaSedeLegaleCAP: string;
+  impresaPartitaIVA: string;
+  impresaCodiceFiscale?: string;
+  impresaIscrizioneCCIAA?: string;
+  impresaIscrizioneCCIAANumero?: string;
+  impresaIscrizioneAlboArtigiani?: string;
+  impresaIscrizioneAlboArtigianiNumero?: string;
+  
+  // DATI IMPIANTO
+  descrizioneImpianto: string;
+  tipoIntervento: 'nuovo' | 'trasformazione' | 'ampliamento' | 'manutenzione_straordinaria' | 'altro';
+  tipoInterventoAltro?: string;
+  tipoGasDistribuito?: string;
+  potenzaMassimaImpegnabile?: number;
+  
+  // DATI COMMITTENTE
+  committenteNome: string;
+  committenteCognome?: string;
+  committenteRagioneSociale?: string;
+  
+  // DATI UBICAZIONE
+  ubicazioneComune: string;
+  ubicazioneProvincia: string;
+  ubicazioneIndirizzo: string;
+  ubicazioneNumero: string;
+  ubicazioneScala?: string;
+  ubicazionePiano?: string;
+  ubicazioneInterno?: string;
+  
+  // DATI PROPRIETARIO
+  proprietarioNome: string;
+  proprietarioCognome?: string;
+  proprietarioRagioneSociale?: string;
+  proprietarioComune?: string;
+  proprietarioIndirizzo?: string;
+  proprietarioNumero?: string;
+  
+  // DATI EDIFICIO
+  usoEdificio: 'industriale' | 'civile' | 'commercio' | 'altri_usi';
+  
+  // DICHIARAZIONE
+  rispettatoProgetto: boolean;
+  progettoRedattoDa?: string;
+  seguitoNormativaTecnica: boolean;
+  normativaTecnicaRiferimento?: string;
+  installatoComponentiRegolaArte: boolean;
+  controllatoImpiantoSicurezza: boolean;
+  
+  // ALLEGATI OBBLIGATORI
+  allegatoProgetto: boolean;
+  allegatoRelazioneMateriali: boolean;
+  allegatoSchemaImpianto: boolean;
+  allegatoDichiarazioniPrecedenti: boolean;
+  allegatoCertificatoRequisiti: boolean;
+  
+  // ALLEGATI FACOLTATIVI
+  allegatiFacoltativi?: string[];
+  
+  // DATI TECNICI
   descrizioneLavoro: string;
   materialiUtilizzati: string[];
   verificheEffettuate: string;
@@ -81,6 +151,13 @@ export interface Tecnico {
   email: string;
   partitaIva: string;
   codiceFiscale: string;
+  // Campi aziendali
+  azienda?: string;
+  ruolo?: 'titolare' | 'legale_rappresentante' | 'dipendente';
+  cciaa?: string;
+  cciaaNumero?: string;
+  alboArtigiani?: string;
+  alboArtigianiNumero?: string;
 }
 
 export interface AppData {

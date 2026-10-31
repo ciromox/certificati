@@ -7,8 +7,8 @@ import Dashboard from './components/Dashboard';
 import ClientiPage from './components/ClientiPage';
 import ImpiantiPage from './components/ImpiantiPage';
 import CertificatiPage from './components/CertificatiPage';
-import CertificatoForm from './components/CertificatoForm';
-import CertificatoPrint from './components/CertificatoPrint';
+import CertificatoFormMinisteriale from './components/CertificatoFormMinisteriale';
+import CertificatoPrintMinisteriale from './components/CertificatoPrintMinisteriale';
 import TecnicoPage from './components/TecnicoPage';
 import SchedeTecnichePage from './components/SchedeTecnichePage';
 import MiniCAD from './components/MiniCAD';
@@ -229,7 +229,7 @@ export default function App() {
         );
       case 'nuovo-certificato':
         return (
-          <CertificatoForm
+          <CertificatoFormMinisteriale
             clienti={data.clienti}
             impianti={data.impianti}
             tecnico={data.tecnico}
@@ -259,7 +259,7 @@ export default function App() {
         );
       case 'stampa':
         return printingCertificato ? (
-          <CertificatoPrint
+          <CertificatoPrintMinisteriale
             certificato={printingCertificato}
             cliente={data.clienti.find(c => c.id === printingCertificato.clienteId)}
             impianto={data.impianti.find(i => i.id === printingCertificato.impiantoId)}
