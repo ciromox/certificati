@@ -13,10 +13,11 @@ import TecnicoPage from './components/TecnicoPage';
 import SchedeTecnichePage from './components/SchedeTecnichePage';
 import MiniCAD from './components/MiniCAD';
 import WizardDiCo from './components/WizardDiCo';
+import SuperWizardProject from './components/SuperWizardProject';
 import ArchivioAllegati, { Allegato, loadAllegati, saveAllegati } from './components/ArchivioAllegati';
 import Sidebar from './components/Sidebar';
 
-type Page = 'dashboard' | 'clienti' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad' | 'allegati';
+type Page = 'dashboard' | 'clienti' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad' | 'allegati' | 'super-wizard';
 
 export default function App() {
   const [data, setData] = useState<AppData>(loadData());
@@ -28,6 +29,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cadImpiantoId, setCadImpiantoId] = useState<string | null>(null);
   const [showWizardDiCo, setShowWizardDiCo] = useState(false);
+  const [showSuperWizard, setShowSuperWizard] = useState(false);
   const [allegati, setAllegati] = useState<Allegato[]>(loadAllegati());
 
   useEffect(() => {
@@ -107,6 +109,28 @@ export default function App() {
   const handlePrintCertificato = (certificato: Certificato) => {
     setPrintingCertificato(certificato);
     setCurrentPage('stampa');
+  };
+
+  // Gestione Super Wizard Project
+  const handleSuperWizardComplete = (projectData: {
+    cliente: Cliente;
+    impianto: Impianto;
+    certificato: any;
+    schede: any[];
+  }) => {
+    // Aggiungi certificato
+    setData(addCertificato(data, projectData.certificato));
+    
+    // Aggiungi tutte le schede
+    let updatedSchede = schede;
+    projectData.schede.forEach(scheda => {
+      updatedSchede = addScheda(updatedSchede, scheda);
+    });
+    setSchede(updatedSchede);
+    
+    setShowSuperWizard(false);
+    alert('Progetto completato con successo!');
+    setCurrentPage('certificati');
   };
 
   // Gestione Schede Tecniche
@@ -258,6 +282,9 @@ export default function App() {
             />
           </div>
         );
+      case 'super-wizard':
+        setShowSuperWizard(true);
+        return <Dashboard data={data} schede={schede} onNavigate={(page: string) => setCurrentPage(page as Page)} />;
       default:
         return <Dashboard data={data} schede={schede} onNavigate={(page: string) => setCurrentPage(page as Page)} />;
     }
@@ -299,6 +326,21 @@ export default function App() {
           certificati={data.certificati}
           onComplete={handleWizardDiCoComplete}
           onCancel={() => setShowWizardDiCo(false)}
+        />
+      )}
+
+      {/* Super Wizard Project Modal */}
+      {showSuperWizard && (
+        <SuperWizardProject
+          clienti={data.clienti}
+          impianti={data.impianti}
+          tecnico={data.tecnico}
+          certificati={data.certificati}
+          schede={schede}
+          onComplete={handleSuperWizardComplete}
+          onCancel={() => setShowSuperWizard(false)}
+          onCreaCliente={handleAddCliente}
+          onCreaImpianto={handleAddImpianto}
         />
       )}
     </div>

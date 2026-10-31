@@ -264,7 +264,7 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <button
           onClick={() => onNavigate('clienti')}
           className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all text-left group"
@@ -318,6 +318,20 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
             <div>
               <p className="font-medium text-gray-800">Nuova Scheda Tecnica</p>
               <p className="text-xs text-gray-500">DiCo, Libretto, Rapporti</p>
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => onNavigate('super-wizard')}
+          className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl p-5 shadow-lg hover:shadow-xl transition-all text-left group text-white"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition">
+              <i className="fas fa-magic text-white"></i>
+            </div>
+            <div>
+              <p className="font-medium">Super Wizard</p>
+              <p className="text-xs text-purple-100">Progetto completo automatico</p>
             </div>
           </div>
         </button>
