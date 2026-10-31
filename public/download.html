@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificazioni Impianti - Download Pacchetto</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { color: #1e293b; font-size: 28px; margin-bottom: 8px; }
+        .header p { color: #64748b; font-size: 16px; }
+        .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { color: #1e293b; font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .card h2 .emoji { font-size: 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-outline { background: white; color: #374151; border: 1px solid #d1d5db; }
+        .btn-outline:hover { background: #f9fafb; }
+        .code { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: 'Monaco', 'Menlo', monospace; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+        .code .comment { color: #64748b; }
+        .code .cmd { color: #60a5fa; }
+        .code .string { color: #34d399; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+        .feature-list { list-style: none; }
+        .feature-list li { padding: 8px 0; display: flex; align-items: center; gap: 8px; color: #374151; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-list .check { color: #22c55e; font-weight: bold; }
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-top: 12px; }
+        .alert-info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+        .alert-warning { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+        .tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 8px; }
+        .tab { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: #64748b; }
+        .tab.active { background: white; color: #1e293b; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .version-badge { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 Gestione Certificazioni Impianti</h1>
+            <p>Legge 37/2008 <span class="version-badge">v1.0</span></p>
+        </div>
+
+        <div class="card">
+            <h2><span class="emoji">📥</span> Download per Installazione Locale</h2>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 16px;">
+                Scarica i file necessari per installare l'applicazione sul tuo computer.
+            </p>
+            <div class="grid-2">
+                <button class="btn btn-primary" onclick="downloadBuild()">
+                    📦 Scarica Build (dist/)
+                </button>
+                <button class="btn btn-success" onclick="downloadJSON()">
+                    💾 Scarica Template Dati
+                </button>
+            </div>
+            <div class="alert alert-info" style="margin-top: 16px;">
+                <strong>💡 Suggerimento:</strong> La build contiene tutti i file statici necessari. 
+                Puoi servirla con qualsiasi web server (Apache, Nginx, Python http.server, ecc.)
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="emoji">⚡</span> Installazione Rapida</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('quick')">Metodo Veloce</button>
+                <button class="tab" onclick="switchTab('dev')">Sviluppo</button>
+                <button class="tab" onclick="switchTab('server')">Server</button>
+            </div>
+            
+            <div id="tab-quick" class="tab-content active">
+                <div class="code">
+                    <span class="comment"># Metodo 1: Apertura diretta (solo per test)</span><br>
+                    <span class="comment"># Apri il file dist/index.html nel browser</span><br><br>
+                    <span class="comment"># Metodo 2: Server Python (consigliato)</span><br>
+                    <span class="cmd">cd</span> dist<br>
+                    <span class="cmd">python3</span> -m http.server 8080<br>
+                    <span class="comment"># Apri http://localhost:8080</span>
+                </div>
+            </div>
+
+            <div id="tab-dev" class="tab-content">
+                <div class="code">
+                    <span class="comment"># Clona o estrai il progetto</span><br>
+                    <span class="cmd">cd</span> progetto-certificazioni<br><br>
+                    <span class="comment"># Installa le dipendenze</span><br>
+                    <span class="cmd">npm</span> install<br><br>
+                    <span class="comment"># Avvia in modalità sviluppo</span><br>
+                    <span class="cmd">npm</span> run dev<br>
+                    <span class="comment"># Apri http://localhost:5173</span><br><br>
+                    <span class="comment"># Build di produzione</span><br>
+                    <span class="cmd">npm</span> run build
+                </div>
+            </div>
+
+            <div id="tab-server" class="tab-content">
+                <div class="code">
+                    <span class="comment"># Node.js</span><br>
+                    <span class="cmd">npx</span> serve dist -p 3000<br><br>
+                    <span class="comment"># PHP</span><br>
+                    <span class="cmd">php</span> -S localhost:8080 -t dist<br><br>
+                    <span class="comment"># Python 3</span><br>
+                    <span class="cmd">python3</span> -m http.server 8080 -d dist<br><br>
+                    <span class="comment"># Apache/Nginx: punta DocumentRoot alla cartella dist/</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="emoji">✅</span> Funzionalità Incluse</h2>
+            <ul class="feature-list">
+                <li><span class="check">✓</span> Dashboard con statistiche e panoramica</li>
+                <li><span class="check">✓</span> Gestione completa anagrafica clienti</li>
+                <li><span class="check">✓</span> Gestione impianti (8 tipologie: elettrico, idrico, gas, riscaldamento, climatizzazione, antincendio, antifurto, ascensori)</li>
+                <li><span class="check">✓</span> Creazione Dichiarazione di Conformità (DiCo)</li>
+                <li><span class="check">✓</span> Creazione Dichiarazione di Rispondenza (DiRi)</li>
+                <li><span class="check">✓</span> Certificati di verifica e manutenzione</li>
+                <li><span class="check">✓</span> Stampa certificati formato conforme</li>
+                <li><span class="check">✓</span> Configurazione dati tecnico responsabile</li>
+                <li><span class="check">✓</span> Esportazione/Importazione dati JSON</li>
+                <li><span class="check">✓</span> Salvataggio automatico nel browser</li>
+                <li><span class="check">✓</span> Norme CEI di riferimento preconfigurate</li>
+                <li><span class="check">✓</span> Interfaccia responsive (desktop, tablet, mobile)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2><span class="emoji">📜</span> Riferimento Normativo</h2>
+            <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+                <strong>D.M. 22 gennaio 2008, n. 37</strong> - Regolamento recante attuazione dell'art. 11-quaterdecies, 
+                comma 13, lettera a) della legge n. 248 del 2 dicembre 2005, recante riordino delle disposizioni 
+                in materia di attività di installazione degli impianti all'interno degli edifici.
+            </p>
+            <div class="alert alert-warning" style="margin-top: 12px;">
+                <strong>⚠️ Nota:</strong> Questa applicazione è uno strumento di supporto alla compilazione. 
+                La responsabilità della conformità dei certificati è del tecnico firmatario.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+        function downloadJSON() {
+            const template = {
+                clienti: [],
+                impianti: [],
+                certificati: [],
+                tecnico: null
+            };
+            const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'template_dati_certificazioni.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadBuild() {
+            alert('Per scaricare la build completa, comprimere la cartella "dist/" in un file ZIP.\n\nPuoi anche usare il comando:\n\n• Windows: Tasto destro sulla cartella dist > Invia a > Cartella compressa\n• Mac: Tasto destro sulla cartella dist > Comprimi\n• Linux: zip -r build.zip dist/');
+        }
+    </script>
+</body>
+</html>

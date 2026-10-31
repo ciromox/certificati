@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installazione Locale - Certificazioni 37/2008</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: white; border-radius: 16px; padding: 40px; max-width: 700px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #1e3a5f; font-size: 24px; margin-bottom: 8px; }
+        .subtitle { color: #6b7280; margin-bottom: 24px; }
+        .badge { display: inline-block; background: #dbeafe; color: #1d4ed8; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 24px; }
+        .section { margin-bottom: 24px; }
+        .section h2 { color: #374151; font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .section h2 .icon { width: 32px; height: 32px; background: #eff6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .step { display: flex; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e5e7eb; }
+        .step-num { width: 28px; height: 28px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content p { color: #374151; font-size: 14px; line-height: 1.5; }
+        .step-content code { background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: monospace; }
+        .code-block { background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 13px; overflow-x: auto; margin: 8px 0; line-height: 1.6; }
+        .code-block .comment { color: #9ca3af; }
+        .code-block .cmd { color: #60a5fa; }
+        .features { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .feature { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f0fdf4; border-radius: 6px; border: 1px solid #bbf7d0; font-size: 13px; color: #166534; }
+        .feature .check { color: #22c55e; }
+        .warning { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-top: 16px; }
+        .warning p { color: #92400e; font-size: 13px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin-top: 16px; transition: background 0.2s; }
+        .btn:hover { background: #1d4ed8; }
+        .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
+        .footer { text-align: center; color: #9ca3af; font-size: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="badge">📋 Legge 37/2008</span>
+        <h1>🔌 Gestione Certificazioni Impianti</h1>
+        <p class="subtitle">Applicazione per la gestione delle certificazioni secondo il D.M. 22/01/2008 n. 37</p>
+
+        <div class="section">
+            <h2><span class="icon">📦</span> Installazione in Locale</h2>
+            
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>Prerequisiti:</strong> Installare <a href="https://nodejs.org" target="_blank">Node.js</a> (v18 o superiore)</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Estrarre l'archivio</strong> in una cartella a scelta</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p>Aprire il terminale nella cartella del progetto ed eseguire:</p>
+                    <div class="code-block">
+                        <span class="comment"># Installare le dipendenze</span><br>
+                        <span class="cmd">npm install</span><br><br>
+                        <span class="comment"># Avviare in modalità sviluppo</span><br>
+                        <span class="cmd">npm run dev</span><br><br>
+                        <span class="comment"># Oppure creare la build di produzione</span><br>
+                        <span class="cmd">npm run build</span><br>
+                        <span class="comment"># I file saranno nella cartella dist/</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p>L'applicazione sarà disponibile all'indirizzo <code>http://localhost:5173</code></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><span class="icon">⚡</span> Funzionalità</h2>
+            <div class="features">
+                <div class="feature"><span class="check">✓</span> Gestione Clienti</div>
+                <div class="feature"><span class="check">✓</span> Gestione Impianti</div>
+                <div class="feature"><span class="check">✓</span> DiCo (Conformità)</div>
+                <div class="feature"><span class="check">✓</span> DiRi (Rispondenza)</div>
+                <div class="feature"><span class="check">✓</span> Stampa Certificati</div>
+                <div class="feature"><span class="check">✓</span> Esporta/Importa Dati</div>
+                <div class="feature"><span class="check">✓</span> Dashboard Statistiche</div>
+                <div class="feature"><span class="check">✓</span> Dati Tecnico</div>
+                <div class="feature"><span class="check">✓</span> 8 Tipologie Impianti</div>
+                <div class="feature"><span class="check">✓</span> Norme CEI di Riferimento</div>
+                <div class="feature"><span class="check">✓</span> Salvataggio Locale</div>
+                <div class="feature"><span class="check">✓</span> Responsive Design</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><span class="icon">💾</span> Salvataggio Dati</h2>
+            <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+                I dati vengono salvati automaticamente nel browser (localStorage). 
+                Utilizzare la funzione <strong>"Esporta Dati"</strong> per creare un backup JSON.
+                I dati possono essere reimportati in qualsiasi momento con <strong>"Importa Dati"</strong>.
+            </p>
+            <div class="warning">
+                <p>⚠️ <strong>Attenzione:</strong> I dati sono salvati solo nel browser in uso. 
+                Cancellare i dati del browser o cambiare dispositivo comporterà la perdita dei dati se non esportati.</p>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2><span class="icon">📜</span> Riferimenti Normativi</h2>
+            <p style="color: #374151; font-size: 14px; line-height: 1.6;">
+                <strong>D.M. 22 gennaio 2008, n. 37</strong> - Regolamento recante attuazione dell'art. 11-quaterdecies, 
+                comma 13, lettera a) della legge n. 248 del 2 dicembre 2005, recante riordino delle disposizioni 
+                in materia di attività di installazione degli impianti all'interno degli edifici.
+            </p>
+            <p style="color: #6b7280; font-size: 13px; margin-top: 8px;">
+                Tipologie impianto: elettrici, idrico-sanitari, gas, riscaldamento, climatizzazione, 
+                antincendio, antifurto, ascensori e montacarichi.
+            </p>
+        </div>
+
+        <a href="/" class="btn">🚀 Avvia Applicazione</a>
+
+        <div class="footer">
+            <p>Gestione Certificazioni v1.0 | D.M. 37/2008</p>
+            <p style="margin-top: 4px;">© 2024 - Applicazione per uso professionale</p>
+        </div>
+    </div>
+</body>
+</html>
