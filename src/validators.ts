@@ -466,6 +466,54 @@ export function validateCliente(cliente: any): ValidationResult {
   return { valid: errors.length === 0, errors, warnings };
 }
 
+// Validazione parametri impianto F-Gas (DPR 146/2018)
+export function validateImpiantoFGas(dati: {
+  caricaGas?: number;
+  gwp?: number;
+  co2Equivalente?: number;
+}): ValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  
+  // Carica gas
+  if (dati.caricaGas !== undefined) {
+    if (dati.caricaGas <= 0) {
+      errors.push('La carica di gas deve essere maggiore di zero');
+    }
+    if (dati.caricaGas >= 3) {
+      warnings.push('Carica ≥ 3 kg: obbligo di registrazione e controllo perdite');
+    }
+    if (dati.caricaGas >= 5) {
+      warnings.push('Carica ≥ 5 kg: obblighi rafforzati per impianti non ermetici');
+    }
+  }
+  
+  // GWP
+  if (dati.gwp !== undefined) {
+    if (dati.gwp < 0) {
+      errors.push('Il GWP non può essere negativo');
+    }
+    if (dati.gwp > 2500) {
+      warnings.push('GWP molto elevato (> 2500): gas ad alto impatto, verificare limitazioni normative');
+    }
+  }
+  
+  // CO2 equivalente
+  if (dati.co2Equivalente !== undefined) {
+    if (dati.co2Equivalente >= 5) {
+      warnings.push('CO2 eq ≥ 5 ton: controllo perdite obbligatorio ogni 12 mesi');
+    }
+    if (dati.co2Equivalente >= 50) {
+      warnings.push('CO2 eq ≥ 50 ton: controllo perdite ogni 6 mesi + detector obbligatorio');
+    }
+    if (dati.co2Equivalente >= 500) {
+      errors.push('CO2 eq ≥ 500 ton: controllo perdite ogni 3 mesi + detector obbligatorio');
+    }
+  }
+  
+  return { valid: errors.length === 0, errors, warnings };
+}
+
 // Validazione conformità impianto a norma
 export function checkConformitaImpianto(tipo: string, dati: any): {
   conforme: boolean;
@@ -506,6 +554,20 @@ export function checkConformitaImpianto(tipo: string, dati: any): {
     if (dati.potenza && dati.potenza > 35) {
       richiedeProgetto = true;
       note.push('Potenza superiore a 35 kW: richiesto progetto e libretto di impianto');
+    }
+  }
+  
+  if (tipo === 'fgas') {
+    // DPR 146/2018 - Obblighi F-Gas
+    if (dati.caricaGas && dati.caricaGas >= 3) {
+      note.push('Carica ≥ 3 kg: obbligo registro e controllo perdite (DPR 146/2018)');
+    }
+    if (dati.co2Equivalente && dati.co2Equivalente >= 5) {
+      note.push('CO2 eq ≥ 5 ton: controllo perdite periodico obbligatorio');
+    }
+    if (dati.co2Equivalente && dati.co2Equivalente >= 50) {
+      richiedeProgetto = true;
+      note.push('CO2 eq ≥ 50 ton: detector perdite obbligatorio');
     }
   }
   

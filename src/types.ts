@@ -38,6 +38,7 @@ export type TipologiaImpianto =
   | 'gas'
   | 'riscaldamento'
   | 'climatizzazione'
+  | 'fgas'
   | 'antincendio'
   | 'antifurto'
   | 'ascensori';
