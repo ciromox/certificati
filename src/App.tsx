@@ -38,6 +38,14 @@ export default function App() {
     setSchemiCad(loadCadSchemi());
   }, []);
 
+  // Gestisci apertura Super Wizard quando si naviga alla pagina
+  useEffect(() => {
+    if (currentPage === 'super-wizard') {
+      setShowSuperWizard(true);
+      setCurrentPage('dashboard'); // Torna alla dashboard dopo aver aperto il wizard
+    }
+  }, [currentPage]);
+
   const handleAddCliente = (cliente: Omit<Cliente, 'id' | 'dataCreazione'>) => {
     setData(addCliente(data, cliente));
   };
@@ -282,9 +290,6 @@ export default function App() {
             />
           </div>
         );
-      case 'super-wizard':
-        setShowSuperWizard(true);
-        return <Dashboard data={data} schede={schede} onNavigate={(page: string) => setCurrentPage(page as Page)} />;
       default:
         return <Dashboard data={data} schede={schede} onNavigate={(page: string) => setCurrentPage(page as Page)} />;
     }
