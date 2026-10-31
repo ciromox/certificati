@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { SchedaTecnica, TipoSchedaTecnica, CONFIG_SCHEDE } from '../schedeTecniche';
+import { SchedaTipo, SCHEDE_DEFINIZIONI } from '../schedeFields';
 import { Cliente, Impianto } from '../types';
-import SchedaForm from './SchedaForm';
+import SchedaFormDinamico from './SchedaFormDinamico';
 import SchedaPrint from './SchedaPrint';
 
 interface SchedeTecnichePageProps {
@@ -20,6 +21,7 @@ export default function SchedeTecnichePage({ schede, clienti, impianti, onAdd, o
   const [filterTipo, setFilterTipo] = useState<string>('');
   const [filterStato, setFilterStato] = useState<string>('');
   const [search, setSearch] = useState('');
+  const [selectedTipoScheda, setSelectedTipoScheda] = useState<SchedaTipo | null>(null);
 
   const getClienteNome = (id: string) => {
     const c = clienti.find(cl => cl.id === id);
@@ -69,15 +71,74 @@ export default function SchedeTecnichePage({ schede, clienti, impianti, onAdd, o
     );
   }
 
-  if (showForm) {
+  if (showForm && selectedTipoScheda) {
     return (
-      <SchedaForm
-        scheda={editing}
-        clienti={clienti}
-        impianti={impianti}
-        onSave={handleSave}
-        onCancel={() => { setShowForm(false); setEditing(null); }}
+      <SchedaFormDinamico
+        tipoScheda={selectedTipoScheda}
+        datiIniziali={editing?.dati || {}}
+        onSave={(dati) => {
+          if (editing) {
+            onUpdate({ ...editing, dati });
+          } else {
+            onAdd({
+              numero: `${selectedTipoScheda.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+              tipo: selectedTipoScheda as any,
+              impiantoId: '',
+              clienteId: '',
+              dataCompilazione: new Date().toISOString().split('T')[0],
+              stato: 'compilata',
+              tecnicoId: '',
+              dati,
+            });
+          }
+          setShowForm(false);
+          setEditing(null);
+          setSelectedTipoScheda(null);
+        }}
+        onCancel={() => { setShowForm(false); setEditing(null); setSelectedTipoScheda(null); }}
       />
+    );
+  }
+
+  // Selezione tipo scheda
+  if (showForm && !selectedTipoScheda) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Seleziona Tipo Scheda</h1>
+            <p className="text-gray-500 mt-1">Scegli il tipo di scheda tecnica da compilare</p>
+          </div>
+          <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-gray-700">
+            <i className="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Object.entries(SCHEDE_DEFINIZIONI).map(([tipo, def]) => (
+            <button
+              key={tipo}
+              onClick={() => setSelectedTipoScheda(tipo as SchedaTipo)}
+              className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all text-left"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-file-alt text-blue-600 text-xl"></i>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-gray-800 mb-1">{def.titolo}</h3>
+                  <p className="text-xs text-blue-600 mb-2">{def.norma}</p>
+                  <p className="text-sm text-gray-600">{def.descrizione}</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    <i className="fas fa-list mr-1"></i>
+                    {def.sezioni.length} sezioni • {def.sezioni.reduce((acc, s) => acc + s.campi.length, 0)} campi
+                  </p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     );
   }
 
