@@ -389,5 +389,5 @@ Editor grafico professionale per planimetrie e schemi unifilari con funzionalitÃ
 ---
 
 **Versione**: 3.0  
-**Ultimo aggiornamento**: 2024  
+**Ultimo aggiornamento**: 2026
 **Stato**: Produzione âœ…
