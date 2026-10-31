@@ -18,6 +18,7 @@ export default function Sidebar({ currentPage, onNavigate, onExport, onImport, i
     { id: 'impianti', label: 'Impianti', icon: 'fas fa-building' },
     { id: 'certificati', label: 'Certificati', icon: 'fas fa-file-certificate' },
     { id: 'schede', label: 'Schede Tecniche', icon: 'fas fa-file-medical' },
+    { id: 'allegati', label: 'Archivio Allegati', icon: 'fas fa-archive' },
     { id: 'tecnico', label: 'Dati Tecnico', icon: 'fas fa-user-tie' },
   ];
 

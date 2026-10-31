@@ -9,9 +9,10 @@ interface CertificatiPageProps {
   onEdit: (certificato: Certificato) => void;
   onDelete: (id: string) => void;
   onPrint: (certificato: Certificato) => void;
+  onWizard?: () => void;
 }
 
-export default function CertificatiPage({ certificati, clienti, impianti, onAdd, onEdit, onDelete, onPrint }: CertificatiPageProps) {
+export default function CertificatiPage({ certificati, clienti, impianti, onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
   const [search, setSearch] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterStato, setFilterStato] = useState('');
@@ -88,11 +89,20 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Certificati</h1>
           <p className="text-gray-500 mt-1">Gestione dichiarazioni di conformità e rispondenza</p>
         </div>
-        <button onClick={onAdd}
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-purple-200">
-          <i className="fas fa-plus"></i>
-          <span>Nuovo Certificato</span>
-        </button>
+        <div className="flex gap-2">
+          {onWizard && (
+            <button onClick={onWizard}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-blue-200">
+              <i className="fas fa-magic"></i>
+              <span>Wizard DiCo</span>
+            </button>
+          )}
+          <button onClick={onAdd}
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition shadow-lg shadow-purple-200">
+            <i className="fas fa-plus"></i>
+            <span>Nuovo Certificato</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
