@@ -3,6 +3,7 @@ import { Certificato, Cliente, Impianto, Tecnico, TipoCertificato } from '../typ
 import { generateNumeroCertificato } from '../store';
 import { validateAbilitazioneTecnico, ValidationResult } from '../validators';
 import ValidationMessages from './ValidationMessages';
+import SelezionaMateriali from './SelezionaMateriali';
 
 interface CertificatoFormProps {
   clienti: Cliente[];
@@ -272,28 +273,12 @@ export default function CertificatoForm({ clienti, impianti, tecnico, certificat
             <i className="fas fa-boxes text-orange-500"></i>
             Materiali Utilizzati
           </h2>
-          <div className="flex gap-2 mb-3">
-            <input type="text" value={newMateriale} onChange={e => setNewMateriale(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMateriale(); } }}
-              placeholder="Aggiungi materiale (es. Interruttore differenziale 30mA)"
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
-            <button type="button" onClick={addMateriale}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
-              <i className="fas fa-plus"></i>
-            </button>
-          </div>
-          {form.materialiUtilizzati.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {form.materialiUtilizzati.map((m, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm border border-orange-200">
-                  {m}
-                  <button type="button" onClick={() => removeMateriale(i)} className="text-orange-400 hover:text-orange-600">
-                    <i className="fas fa-times text-xs"></i>
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+          <SelezionaMateriali
+            tipoImpianto={impianti.find(i => i.id === form.impiantoId)?.tipologia || ''}
+            materialiSelezionati={form.materialiUtilizzati}
+            onAdd={(materiale) => setForm({...form, materialiUtilizzati: [...form.materialiUtilizzati, materiale]})}
+            onRemove={(index) => setForm({...form, materialiUtilizzati: form.materialiUtilizzati.filter((_, i) => i !== index)})}
+          />
         </div>
 
         {/* Norme */}

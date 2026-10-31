@@ -23,6 +23,8 @@ export interface CadElement {
   // Per blocchi
   blockType?: string;
   elements?: CadElement[];
+  // Per resize
+  scale?: number;
 }
 
 export interface MiniCADProps {
@@ -130,6 +132,8 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   const [clipboard, setClipboard] = useState<CadElement[]>([]);
   const [autoConnect, setAutoConnect] = useState(true);
   const [selectionBox, setSelectionBox] = useState<{start: {x: number, y: number}, end: {x: number, y: number}} | null>(null);
+  const [resizing, setResizing] = useState<{elementId: string, handle: string, startX: number, startY: number, originalElement: CadElement} | null>(null);
+  const [rotating, setRotating] = useState<{elementId: string, centerX: number, centerY: number, startAngle: number} | null>(null);
 
   // Salva stato per undo
   const saveState = useCallback(() => {
@@ -474,26 +478,64 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
         ctx.fillText(`${dist.toFixed(0)}`, midX + 10, midY - 10);
       }
 
-      // Selezione
+      // Selezione e resize handles
       if (selectedElements.includes(el.id)) {
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 1 / zoom;
         ctx.setLineDash([5 / zoom, 5 / zoom]);
+        
+        let bounds = { x: 0, y: 0, w: 0, h: 0 };
+        
         if (el.type === 'line' || el.type === 'wall' || el.type === 'connector' || el.type === 'dimension') {
-          ctx.strokeRect(
-            Math.min(el.x, el.x2!) - 5,
-            Math.min(el.y, el.y2!) - 5,
-            Math.abs(el.x2! - el.x) + 10,
-            Math.abs(el.y2! - el.y) + 10
-          );
+          bounds = {
+            x: Math.min(el.x, el.x2!) - 5,
+            y: Math.min(el.y, el.y2!) - 5,
+            w: Math.abs(el.x2! - el.x) + 10,
+            h: Math.abs(el.y2! - el.y) + 10
+          };
         } else if (el.type === 'rect') {
-          ctx.strokeRect(el.x - 5, el.y - 5, el.width! + 10, el.height! + 10);
+          bounds = { x: el.x - 5, y: el.y - 5, w: el.width! + 10, h: el.height! + 10 };
         } else if (el.type === 'circle') {
-          ctx.strokeRect(el.x - el.radius! - 5, el.y - el.radius! - 5, el.radius! * 2 + 10, el.radius! * 2 + 10);
+          bounds = { x: el.x - el.radius! - 5, y: el.y - el.radius! - 5, w: el.radius! * 2 + 10, h: el.radius! * 2 + 10 };
         } else {
-          ctx.strokeRect(el.x - 25, el.y - 25, 50, 50);
+          bounds = { x: el.x - 25, y: el.y - 25, w: 50, h: 50 };
         }
+        
+        ctx.strokeRect(bounds.x, bounds.y, bounds.w, bounds.h);
         ctx.setLineDash([]);
+        
+        // Disegna resize handles
+        const handleSize = 6 / zoom;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5 / zoom;
+        
+        // Angoli
+        const corners = [
+          { x: bounds.x, y: bounds.y }, // top-left
+          { x: bounds.x + bounds.w, y: bounds.y }, // top-right
+          { x: bounds.x, y: bounds.y + bounds.h }, // bottom-left
+          { x: bounds.x + bounds.w, y: bounds.y + bounds.h }, // bottom-right
+        ];
+        
+        corners.forEach(corner => {
+          ctx.fillRect(corner.x - handleSize/2, corner.y - handleSize/2, handleSize, handleSize);
+          ctx.strokeRect(corner.x - handleSize/2, corner.y - handleSize/2, handleSize, handleSize);
+        });
+        
+        // Handle di rotazione (sopra il centro)
+        const rotationHandleY = bounds.y - 20 / zoom;
+        const rotationHandleX = bounds.x + bounds.w / 2;
+        ctx.beginPath();
+        ctx.arc(rotationHandleX, rotationHandleY, handleSize/2 + 2/zoom, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Linea che collega al centro
+        ctx.beginPath();
+        ctx.moveTo(bounds.x + bounds.w / 2, bounds.y);
+        ctx.lineTo(rotationHandleX, rotationHandleY);
+        ctx.stroke();
       }
 
       ctx.restore();
@@ -580,10 +622,81 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     };
   };
 
+  // Funzione per rilevare handle di resize/rotazione
+  const detectHandle = (coords: {x: number, y: number}, element: CadElement): string | null => {
+    if (!selectedElements.includes(element.id)) return null;
+    
+    const handleSize = 8 / zoom;
+    let bounds = { x: 0, y: 0, w: 0, h: 0 };
+    
+    if (element.type === 'line' || element.type === 'wall' || element.type === 'connector' || element.type === 'dimension') {
+      bounds = {
+        x: Math.min(element.x, element.x2!) - 5,
+        y: Math.min(element.y, element.y2!) - 5,
+        w: Math.abs(element.x2! - element.x) + 10,
+        h: Math.abs(element.y2! - element.y) + 10
+      };
+    } else if (element.type === 'rect') {
+      bounds = { x: element.x - 5, y: element.y - 5, w: element.width! + 10, h: element.height! + 10 };
+    } else if (element.type === 'circle') {
+      bounds = { x: element.x - element.radius! - 5, y: element.y - element.radius! - 5, w: element.radius! * 2 + 10, h: element.radius! * 2 + 10 };
+    } else {
+      bounds = { x: element.x - 25, y: element.y - 25, w: 50, h: 50 };
+    }
+    
+    // Controlla handle di rotazione
+    const rotationHandleY = bounds.y - 20 / zoom;
+    const rotationHandleX = bounds.x + bounds.w / 2;
+    const distToRotation = Math.sqrt(Math.pow(coords.x - rotationHandleX, 2) + Math.pow(coords.y - rotationHandleY, 2));
+    if (distToRotation < handleSize) {
+      return 'rotate';
+    }
+    
+    // Controlla handle di resize (angoli)
+    const corners = [
+      { x: bounds.x, y: bounds.y, name: 'tl' },
+      { x: bounds.x + bounds.w, y: bounds.y, name: 'tr' },
+      { x: bounds.x, y: bounds.y + bounds.h, name: 'bl' },
+      { x: bounds.x + bounds.w, y: bounds.y + bounds.h, name: 'br' },
+    ];
+    
+    for (const corner of corners) {
+      if (Math.abs(coords.x - corner.x) < handleSize && Math.abs(coords.y - corner.y) < handleSize) {
+        return corner.name;
+      }
+    }
+    
+    return null;
+  };
+
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoords(e);
     
     if (tool === 'select') {
+      // Controlla prima se c'è un handle sotto il cursore
+      if (selectedElements.length === 1) {
+        const selectedEl = elementi.find(el => el.id === selectedElements[0]);
+        if (selectedEl) {
+          const handle = detectHandle(coords, selectedEl);
+          if (handle) {
+            if (handle === 'rotate') {
+              // Inizia rotazione
+              const centerX = selectedEl.type === 'rect' ? selectedEl.x + selectedEl.width! / 2 : selectedEl.x;
+              const centerY = selectedEl.type === 'rect' ? selectedEl.y + selectedEl.height! / 2 : selectedEl.y;
+              const startAngle = Math.atan2(coords.y - centerY, coords.x - centerX);
+              setRotating({ elementId: selectedEl.id, centerX, centerY, startAngle });
+              saveState();
+              return;
+            } else {
+              // Inizia resize
+              setResizing({ elementId: selectedEl.id, handle, startX: coords.x, startY: coords.y, originalElement: { ...selectedEl } });
+              saveState();
+              return;
+            }
+          }
+        }
+      }
+      
       const clicked = [...elementi].reverse().find(el => {
         if (el.type === 'line' || el.type === 'wall' || el.type === 'connector' || el.type === 'dimension') {
           const dist = Math.abs((el.y2! - el.y) * coords.x - (el.x2! - el.x) * coords.y + el.x2! * el.y - el.y2! * el.x) /
@@ -675,6 +788,72 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       setSelectionBox({ ...selectionBox, end: coords });
     }
 
+    // Gestione resize
+    if (resizing) {
+      const dx = coords.x - resizing.startX;
+      const dy = coords.y - resizing.startY;
+      const orig = resizing.originalElement;
+      
+      const updated = elementi.map(el => {
+        if (el.id !== resizing.elementId) return el;
+        
+        if (el.type === 'rect') {
+          let newX = el.x;
+          let newY = el.y;
+          let newW = el.width!;
+          let newH = el.height!;
+          
+          switch (resizing.handle) {
+            case 'br':
+              newW = Math.max(10, orig.width! + dx);
+              newH = Math.max(10, orig.height! + dy);
+              break;
+            case 'bl':
+              newX = orig.x + dx;
+              newW = Math.max(10, orig.width! - dx);
+              newH = Math.max(10, orig.height! + dy);
+              break;
+            case 'tr':
+              newY = orig.y + dy;
+              newW = Math.max(10, orig.width! + dx);
+              newH = Math.max(10, orig.height! - dy);
+              break;
+            case 'tl':
+              newX = orig.x + dx;
+              newY = orig.y + dy;
+              newW = Math.max(10, orig.width! - dx);
+              newH = Math.max(10, orig.height! - dy);
+              break;
+          }
+          
+          return { ...el, x: newX, y: newY, width: newW, height: newH };
+        } else if (el.type === 'circle') {
+          const newRadius = Math.max(5, orig.radius! + Math.max(dx, dy));
+          return { ...el, radius: newRadius };
+        }
+        
+        return el;
+      });
+      
+      onChange(updated);
+      return;
+    }
+
+    // Gestione rotazione
+    if (rotating) {
+      const currentAngle = Math.atan2(coords.y - rotating.centerY, coords.x - rotating.centerX);
+      const angleDiff = (currentAngle - rotating.startAngle) * (180 / Math.PI);
+      
+      const updated = elementi.map(el => {
+        if (el.id !== rotating.elementId) return el;
+        return { ...el, rotation: ((el.rotation || 0) + angleDiff) % 360 };
+      });
+      
+      onChange(updated);
+      rotating.startAngle = currentAngle;
+      return;
+    }
+
     if (dragging && tool === 'select' && selectedElements.length > 0) {
       const dx = coords.x - dragOffset.x;
       const dy = coords.y - dragOffset.y;
@@ -694,6 +873,16 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Termina resize o rotazione
+    if (resizing) {
+      setResizing(null);
+      return;
+    }
+    if (rotating) {
+      setRotating(null);
+      return;
+    }
+
     if (tool === 'select' && selectionBox) {
       // Seleziona elementi dentro il box
       const box = selectionBox;

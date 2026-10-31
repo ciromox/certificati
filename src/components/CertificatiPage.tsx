@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Certificato, Cliente, Impianto } from '../types';
+import { SchedaTecnica } from '../schedeTecniche';
+import StampaMultiplaSchede from './StampaMultiplaSchede';
 
 interface CertificatiPageProps {
   certificati: Certificato[];
   clienti: Cliente[];
   impianti: Impianto[];
+  schede: SchedaTecnica[];
   onAdd: () => void;
   onEdit: (certificato: Certificato) => void;
   onDelete: (id: string) => void;
@@ -12,10 +15,11 @@ interface CertificatiPageProps {
   onWizard?: () => void;
 }
 
-export default function CertificatiPage({ certificati, clienti, impianti, onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
+export default function CertificatiPage({ certificati, clienti, impianti, schede, onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
   const [search, setSearch] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterStato, setFilterStato] = useState('');
+  const [stampaMultipla, setStampaMultipla] = useState<Certificato | null>(null);
 
   const getClienteNome = (id: string) => {
     const c = clienti.find(cl => cl.id === id);
@@ -81,6 +85,23 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
     const matchStato = !filterStato || c.stato === filterStato;
     return matchSearch && matchTipo && matchStato;
   }).sort((a, b) => new Date(b.dataCreazione).getTime() - new Date(a.dataCreazione).getTime());
+
+  // Render stampa multipla schede
+  if (stampaMultipla) {
+    const schedeCollegate = schede.filter(s => s.impiantoId === stampaMultipla.impiantoId);
+    const cliente = clienti.find(c => c.id === stampaMultipla.clienteId);
+    const impianto = impianti.find(i => i.id === stampaMultipla.impiantoId);
+    
+    return (
+      <StampaMultiplaSchede
+        schede={schedeCollegate}
+        cliente={cliente}
+        impianto={impianto}
+        tecnico={null}
+        onClose={() => setStampaMultipla(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -182,9 +203,20 @@ export default function CertificatiPage({ certificati, clienti, impianti, onAdd,
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => onPrint(cert)} title="Stampa"
+                  <button onClick={() => onPrint(cert)} title="Stampa Certificato"
                     className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition">
                     <i className="fas fa-print"></i>
+                  </button>
+                  <button onClick={() => {
+                    const schedeCollegate = schede.filter(s => s.impiantoId === cert.impiantoId);
+                    if (schedeCollegate.length > 0) {
+                      setStampaMultipla(cert);
+                    } else {
+                      alert('Nessuna scheda tecnica collegata a questo impianto. Crea prima le schede tecniche.');
+                    }
+                  }} title="Stampa Schede Collegate come Allegati"
+                    className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition">
+                    <i className="fas fa-paperclip"></i>
                   </button>
                   <button onClick={() => onEdit(cert)} title="Modifica"
                     className="p-2 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition">

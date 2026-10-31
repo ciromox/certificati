@@ -187,6 +187,7 @@ export default function App() {
             certificati={data.certificati}
             clienti={data.clienti}
             impianti={data.impianti}
+            schede={schede}
             onAdd={() => { setEditingCertificato(null); setCurrentPage('nuovo-certificato'); }}
             onEdit={handleEditCertificato}
             onDelete={handleDeleteCertificato}
