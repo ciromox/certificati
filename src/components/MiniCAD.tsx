@@ -74,6 +74,25 @@ export const SIMBOLI_ARCHITETTONICI = [
   { id: 'ascensore', label: 'Ascensore', icon: '🛗', connectors: ['left', 'right', 'top', 'bottom'] },
 ];
 
+export const SIMBOLI_FGAS = [
+  { id: 'unita_esterna', label: 'Unità Esterna', icon: '🌡️', connectors: ['left', 'right', 'bottom'] },
+  { id: 'unita_interna', label: 'Unità Interna', icon: '❄️', connectors: ['left', 'right', 'bottom'] },
+  { id: 'split', label: 'Split', icon: '🌀', connectors: ['bottom'] },
+  { id: 'multisplit', label: 'Multi-Split', icon: '🔀', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'chiller', label: 'Chiller', icon: '🧊', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'vrv_vrf', label: 'VRV/VRF', icon: '⚡', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'tubo_frigorifero', label: 'Tubo Frigorifero', icon: '🔵', connectors: ['left', 'right'] },
+  { id: 'valvola_espansione', label: 'Valvola Espansione', icon: '⭕', connectors: ['left', 'right'] },
+  { id: 'compressore', label: 'Compressore', icon: '⚙️', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'condensatore', label: 'Condensatore', icon: '🔥', connectors: ['left', 'right'] },
+  { id: 'evaporatore', label: 'Evaporatore', icon: '💨', connectors: ['left', 'right'] },
+  { id: 'serbatoio', label: 'Serbatoio', icon: '🛢️', connectors: ['top', 'bottom'] },
+  { id: 'filtro_disidratatore', label: 'Filtro Disidratatore', icon: '🔘', connectors: ['left', 'right'] },
+  { id: 'scambiatore', label: 'Scambiatore', icon: '🔄', connectors: ['left', 'right', 'top', 'bottom'] },
+  { id: 'ventilatore', label: 'Ventilatore', icon: '🌬️', connectors: ['bottom'] },
+  { id: 'termostato_ambiente', label: 'Termostato Ambiente', icon: '🌡', connectors: ['bottom'] },
+];
+
 type Tool = 'select' | 'line' | 'rect' | 'circle' | 'text' | 'symbol' | 'wall' | 'door' | 'window' | 'pan' | 'measure' | 'connector' | 'dimension' | 'align' | 'rotate' | 'mirror';
 
 export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: MiniCADProps) {
@@ -93,7 +112,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   const [showGrid, setShowGrid] = useState(true);
   const [gridSize, setGridSize] = useState(20);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [symbolCategory, setSymbolCategory] = useState<'elettrici' | 'idraulici' | 'architettonici'>('elettrici');
+  const [symbolCategory, setSymbolCategory] = useState<'elettrici' | 'idraulici' | 'architettonici' | 'fgas'>('elettrici');
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({x: 0, y: 0});
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -273,7 +292,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
       if (el.id === excludeId) return;
       if (el.type !== 'symbol') return;
       
-      const simbolo = [...SIMBOLI_ELETTRICI, ...SIMBOLI_IDRAULICI, ...SIMBOLI_ARCHITETTONICI].find(s => s.id === el.symbolType);
+      const simbolo = [...SIMBOLI_ELETTRICI, ...SIMBOLI_IDRAULICI, ...SIMBOLI_ARCHITETTONICI, ...SIMBOLI_FGAS].find(s => s.id === el.symbolType);
       if (!simbolo) return;
 
       // Calcola punti di connessione basati sui connettori del simbolo
@@ -397,7 +416,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
         ctx.font = `${14 / zoom}px sans-serif`;
         ctx.fillText(el.text || '', el.x, el.y);
       } else if (el.type === 'symbol') {
-        const simbolo = [...SIMBOLI_ELETTRICI, ...SIMBOLI_IDRAULICI, ...SIMBOLI_ARCHITETTONICI].find(s => s.id === el.symbolType);
+        const simbolo = [...SIMBOLI_ELETTRICI, ...SIMBOLI_IDRAULICI, ...SIMBOLI_ARCHITETTONICI, ...SIMBOLI_FGAS].find(s => s.id === el.symbolType);
         if (simbolo) {
           ctx.font = `${24 / zoom}px sans-serif`;
           ctx.fillText(simbolo.icon, el.x - 12 / zoom, el.y + 8 / zoom);
@@ -541,8 +560,20 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - panOffset.x) / zoom;
-    const y = (e.clientY - rect.top - panOffset.y) / zoom;
+    
+    // Calcola il rapporto tra dimensioni reali del canvas e dimensioni visualizzate
+    // Questo è fondamentale quando il canvas viene scalato via CSS
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Converti coordinate mouse in coordinate canvas reali
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+    
+    // Applica pan e zoom per ottenere coordinate del mondo
+    const x = (canvasX - panOffset.x) / zoom;
+    const y = (canvasY - panOffset.y) / zoom;
+    
     return {
       x: snapToGrid ? snap(x) : x,
       y: snapToGrid ? snap(y) : y,
@@ -813,7 +844,7 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
     return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
   }, []);
 
-  const simboli = symbolCategory === 'elettrici' ? SIMBOLI_ELETTRICI : symbolCategory === 'idraulici' ? SIMBOLI_IDRAULICI : SIMBOLI_ARCHITETTONICI;
+  const simboli = symbolCategory === 'elettrici' ? SIMBOLI_ELETTRICI : symbolCategory === 'idraulici' ? SIMBOLI_IDRAULICI : symbolCategory === 'fgas' ? SIMBOLI_FGAS : SIMBOLI_ARCHITETTONICI;
 
   return (
     <div ref={containerRef} className={`fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 ${isFullScreen ? 'p-0' : ''}`}>
@@ -889,15 +920,18 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
           {/* Palette simboli */}
           {tool === 'symbol' && (
             <div className="w-60 bg-gray-50 border-r border-gray-200 overflow-y-auto p-3">
-              <div className="flex gap-1 mb-3">
-                <button onClick={() => setSymbolCategory('elettrici')} className={`flex-1 px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'elettrici' ? 'bg-yellow-400 text-gray-900' : 'bg-white text-gray-600'}`}>
+              <div className="grid grid-cols-2 gap-1 mb-3">
+                <button onClick={() => setSymbolCategory('elettrici')} className={`px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'elettrici' ? 'bg-yellow-400 text-gray-900' : 'bg-white text-gray-600'}`}>
                   ⚡ Elettrici
                 </button>
-                <button onClick={() => setSymbolCategory('idraulici')} className={`flex-1 px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'idraulici' ? 'bg-blue-400 text-white' : 'bg-white text-gray-600'}`}>
+                <button onClick={() => setSymbolCategory('idraulici')} className={`px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'idraulici' ? 'bg-blue-400 text-white' : 'bg-white text-gray-600'}`}>
                   🚿 Idraulici
                 </button>
-                <button onClick={() => setSymbolCategory('architettonici')} className={`flex-1 px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'architettonici' ? 'bg-green-400 text-white' : 'bg-white text-gray-600'}`}>
+                <button onClick={() => setSymbolCategory('architettonici')} className={`px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'architettonici' ? 'bg-green-400 text-white' : 'bg-white text-gray-600'}`}>
                   🏠 Arch.
+                </button>
+                <button onClick={() => setSymbolCategory('fgas')} className={`px-2 py-1.5 rounded text-xs font-medium ${symbolCategory === 'fgas' ? 'bg-cyan-400 text-white' : 'bg-white text-gray-600'}`}>
+                  ❄️ F-Gas
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">

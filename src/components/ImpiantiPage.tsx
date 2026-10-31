@@ -20,6 +20,7 @@ const tipologie: { value: TipologiaImpianto; label: string; icon: string }[] = [
   { value: 'gas', label: 'Impianto Gas', icon: 'fas fa-fire' },
   { value: 'riscaldamento', label: 'Impianto Riscaldamento', icon: 'fas fa-thermometer-half' },
   { value: 'climatizzazione', label: 'Impianto Climatizzazione', icon: 'fas fa-snowflake' },
+  { value: 'fgas', label: 'Impianto F-Gas (Refrigerazione)', icon: 'fas fa-snowflake' },
   { value: 'antincendio', label: 'Impianto Antincendio', icon: 'fas fa-fire-extinguisher' },
   { value: 'antifurto', label: 'Impianto Antifurto', icon: 'fas fa-shield-alt' },
   { value: 'ascensori', label: 'Ascensori/Montacarichi', icon: 'fas fa-elevator' },
@@ -327,6 +328,59 @@ export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUp
                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
                         placeholder="Es: 24" />
                       <p className="text-xs text-gray-500 mt-1">Sopra 35 kW serve libretto</p>
+                    </div>
+                  </>
+                )}
+                
+                {(form.tipologia === 'fgas') && (
+                  <>
+                    <div className="md:col-span-2 bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                      <p className="text-xs text-cyan-800 font-medium mb-2">
+                        <i className="fas fa-snowflake mr-1"></i>
+                        Impianto F-Gas - DPR 146/2018 - Reg. UE 517/2014
+                      </p>
+                      <p className="text-xs text-cyan-700">
+                        Obblighi specifici per gas fluorurati ad effetto serra. Certificato F-Gas obbligatorio per tecnici e imprese.
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Gas Refrigerante</label>
+                      <select value={form.tensione || ''} onChange={e => setForm({...form, tensione: e.target.value ? Number(e.target.value) : undefined})}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Seleziona...</option>
+                        <option value="32">R32 (GWP 675)</option>
+                        <option value="410">R410A (GWP 2088)</option>
+                        <option value="407">R407C (GWP 1774)</option>
+                        <option value="134">R134a (GWP 1430)</option>
+                        <option value="1234">R1234yf (GWP &lt;1)</option>
+                        <option value="290">R290 - Propano (GWP 3)</option>
+                        <option value="744">R744 - CO2 (GWP 1)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Carica Gas (kg)</label>
+                      <input type="number" step="0.01" value={form.potenza || ''} 
+                        onChange={e => {
+                          const newForm = {...form, potenza: e.target.value ? Number(e.target.value) : undefined};
+                          setForm(newForm);
+                          const conf = checkConformitaImpianto('fgas', { caricaGas: newForm.potenza });
+                          setConformita(conf);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                        placeholder="Es: 1.5" />
+                      <p className="text-xs text-gray-500 mt-1">≥ 3 kg: obbligo registro</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Tipo Apparecchiatura</label>
+                      <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500">
+                        <option value="">Seleziona...</option>
+                        <option value="split">Split/Single Split</option>
+                        <option value="multisplit">Multi-Split</option>
+                        <option value="vrv">VRV/VRF</option>
+                        <option value="chiller">Chiller</option>
+                        <option value="pompa_calore">Pompa di Calore</option>
+                        <option value="cella">Cella Frigorifera</option>
+                      </select>
                     </div>
                   </>
                 )}
