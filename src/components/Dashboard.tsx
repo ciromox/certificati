@@ -8,19 +8,20 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ data, schede = [], onNavigate }: DashboardProps) {
-  const { clienti, impianti, certificati } = data;
+  const { clienti, impianti, certificati, ditte = [] } = data;
   
   const certificatiAttivi = certificati.filter(c => c.stato === 'emesso');
   const certificatiBozza = certificati.filter(c => c.stato === 'bozza');
   const certificatiScaduti = certificati.filter(c => c.stato === 'scaduto');
+  const ditteAttive = ditte.filter(d => d.attivo);
   
   const stats = [
     { label: 'Clienti', value: clienti.length, icon: 'fas fa-users', color: 'bg-blue-500', page: 'clienti' },
+    { label: 'Ditte', value: ditteAttive.length, icon: 'fas fa-industry', color: 'bg-cyan-500', page: 'ditte' },
     { label: 'Impianti', value: impianti.length, icon: 'fas fa-building', color: 'bg-green-500', page: 'impianti' },
     { label: 'Certificati Emessi', value: certificatiAttivi.length, icon: 'fas fa-file-circle-check', color: 'bg-emerald-500', page: 'certificati' },
     { label: 'In Bozza', value: certificatiBozza.length, icon: 'fas fa-file-pen', color: 'bg-yellow-500', page: 'certificati' },
     { label: 'Schede Tecniche', value: schede.length, icon: 'fas fa-file-medical', color: 'bg-indigo-500', page: 'schede' },
-    { label: 'Totale Certificati', value: certificati.length, icon: 'fas fa-folder-open', color: 'bg-purple-500', page: 'certificati' },
   ];
 
   const ultimiCertificati = [...certificati]
@@ -214,6 +215,75 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
             </div>
           );
         })()}
+      </div>
+
+      {/* Ditte Installatrici */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="font-bold text-lg text-gray-800">
+            <i className="fas fa-industry text-cyan-500 mr-2"></i>
+            Ditte Installatrici
+          </h2>
+          <button onClick={() => onNavigate('ditte')} className="text-cyan-600 hover:text-cyan-700 text-sm font-medium">
+            Gestisci ditte <i className="fas fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+        {ditteAttive.length === 0 ? (
+          <div className="p-8 text-center text-gray-400">
+            <i className="fas fa-industry text-4xl mb-3"></i>
+            <p>Nessuna ditta installatrice registrata</p>
+            <button
+              onClick={() => onNavigate('ditte')}
+              className="mt-3 text-cyan-600 hover:text-cyan-700 font-medium"
+            >
+              Aggiungi la prima ditta
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {ditteAttive.slice(0, 5).map(ditta => (
+              <div key={ditta.id} className="p-4 hover:bg-gray-50 transition">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
+                      <i className="fas fa-building text-cyan-600"></i>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">{ditta.ragioneSociale}</p>
+                      <p className="text-xs text-gray-500">P.IVA: {ditta.partitaIva} • {ditta.settore}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      {ditta.abilitazioni.slice(0, 3).map(ab => (
+                        <span key={ab} className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                          {ab.toUpperCase()}
+                        </span>
+                      ))}
+                      {ditta.abilitazioni.length > 3 && (
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
+                          +{ditta.abilitazioni.length - 3}
+                        </span>
+                      )}
+                    </div>
+                    {ditta.certificatoFGas && (
+                      <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-medium">
+                        F-Gas
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {ditteAttive.length > 5 && (
+              <div className="p-3 text-center">
+                <button onClick={() => onNavigate('ditte')} className="text-cyan-600 hover:text-cyan-700 text-sm font-medium">
+                  Vedi tutte le {ditteAttive.length} ditte <i className="fas fa-arrow-right ml-1"></i>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Recent Certificates */}

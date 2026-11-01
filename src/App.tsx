@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { AppData, Cliente, Impianto, Certificato, Tecnico } from './types';
+import { AppData, Cliente, Impianto, Certificato, Tecnico, DittaInstallatrice } from './types';
 import { SchedaTecnica } from './schedeTecniche';
 import { CadElement } from './components/MiniCAD';
-import { loadData, addCliente, updateCliente, deleteCliente, addImpianto, updateImpianto, deleteImpianto, addCertificato, updateCertificato, deleteCertificato, setTecnico, exportDataAsJSON, importDataFromJSON, loadSchede, addScheda, updateScheda, deleteScheda, loadCadSchemi, saveCadSchema } from './store';
+import { loadData, addCliente, updateCliente, deleteCliente, addImpianto, updateImpianto, deleteImpianto, addCertificato, updateCertificato, deleteCertificato, setTecnico, exportDataAsJSON, importDataFromJSON, loadSchede, addScheda, updateScheda, deleteScheda, loadCadSchemi, saveCadSchema, addDitta, updateDitta, deleteDitta } from './store';
 import Dashboard from './components/Dashboard';
 import ClientiPage from './components/ClientiPage';
+import DitteInstallatriciPage from './components/DitteInstallatriciPage';
 import ImpiantiPage from './components/ImpiantiPage';
 import CertificatiPage from './components/CertificatiPage';
 import CertificatoFormMinisteriale from './components/CertificatoFormMinisteriale';
@@ -17,7 +18,7 @@ import SuperWizardProject from './components/SuperWizardProject';
 import ArchivioAllegati, { Allegato, loadAllegati, saveAllegati } from './components/ArchivioAllegati';
 import Sidebar from './components/Sidebar';
 
-type Page = 'dashboard' | 'clienti' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad' | 'allegati' | 'super-wizard';
+type Page = 'dashboard' | 'clienti' | 'ditte' | 'impianti' | 'certificati' | 'nuovo-certificato' | 'tecnico' | 'stampa' | 'schede' | 'cad' | 'allegati' | 'super-wizard';
 
 export default function App() {
   const [data, setData] = useState<AppData>(loadData());
@@ -93,6 +94,20 @@ export default function App() {
 
   const handleSetTecnico = (tecnico: Tecnico) => {
     setData(setTecnico(data, tecnico));
+  };
+
+  const handleAddDitta = (ditta: Omit<DittaInstallatrice, 'id' | 'dataCreazione'>) => {
+    setData(addDitta(data, ditta));
+  };
+
+  const handleUpdateDitta = (ditta: DittaInstallatrice) => {
+    setData(updateDitta(data, ditta));
+  };
+
+  const handleDeleteDitta = (id: string) => {
+    if (confirm('Sei sicuro di voler eliminare questa ditta?')) {
+      setData(deleteDitta(data, id));
+    }
   };
 
   const handleExport = () => {
@@ -199,6 +214,15 @@ export default function App() {
             onAdd={handleAddCliente}
             onUpdate={handleUpdateCliente}
             onDelete={handleDeleteCliente}
+          />
+        );
+      case 'ditte':
+        return (
+          <DitteInstallatriciPage
+            ditte={data.ditte}
+            onAdd={handleAddDitta}
+            onUpdate={handleUpdateDitta}
+            onDelete={handleDeleteDitta}
           />
         );
       case 'impianti':

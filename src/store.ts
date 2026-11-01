@@ -1,4 +1,4 @@
-import { AppData, Cliente, Impianto, Certificato, Tecnico } from './types';
+import { AppData, Cliente, Impianto, Certificato, Tecnico, DittaInstallatrice } from './types';
 import { SchedaTecnica } from './schedeTecniche';
 import { CadElement } from './components/MiniCAD';
 
@@ -11,6 +11,7 @@ const defaultData: AppData = {
   impianti: [],
   certificati: [],
   tecnico: null,
+  ditte: [],
 };
 
 export function loadData(): AppData {
@@ -216,4 +217,34 @@ export function saveCadSchema(impiantoId: string, elementi: CadElement[]): void 
   const schemi = loadCadSchemi();
   schemi[impiantoId] = elementi;
   localStorage.setItem(CAD_KEY, JSON.stringify(schemi));
+}
+
+// Funzioni per le Ditte Installatrici
+export function addDitta(data: AppData, ditta: Omit<DittaInstallatrice, 'id' | 'dataCreazione'>): AppData {
+  const newDitta: DittaInstallatrice = {
+    ...ditta,
+    id: generateId(),
+    dataCreazione: new Date().toISOString(),
+  };
+  const newData = { ...data, ditte: [...data.ditte, newDitta] };
+  saveData(newData);
+  return newData;
+}
+
+export function updateDitta(data: AppData, ditta: DittaInstallatrice): AppData {
+  const newData = {
+    ...data,
+    ditte: data.ditte.map(d => d.id === ditta.id ? ditta : d),
+  };
+  saveData(newData);
+  return newData;
+}
+
+export function deleteDitta(data: AppData, id: string): AppData {
+  const newData = {
+    ...data,
+    ditte: data.ditte.filter(d => d.id !== id),
+  };
+  saveData(newData);
+  return newData;
 }

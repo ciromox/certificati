@@ -160,9 +160,46 @@ export interface Tecnico {
   alboArtigianiNumero?: string;
 }
 
+export interface DittaInstallatrice {
+  id: string;
+  ragioneSociale: string;
+  partitaIva: string;
+  codiceFiscale?: string;
+  indirizzo: string;
+  numeroCivico: string;
+  citta: string;
+  provincia: string;
+  cap: string;
+  telefono: string;
+  email: string;
+  pec?: string;
+  settore: string;
+  // Abilitazioni D.M. 37/08
+  abilitazioni: ('a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g')[];
+  // Iscrizioni
+  cciaa?: string;
+  cciaaNumero?: string;
+  alboArtigiani?: string;
+  alboArtigianiNumero?: string;
+  // Legale rappresentante
+  legaleRappresentanteNome: string;
+  legaleRappresentanteCognome: string;
+  legaleRappresentanteCF: string;
+  // Certificazioni
+  certificatoISO9001?: boolean;
+  certificatoISO14001?: boolean;
+  certificatoISO45001?: boolean;
+  certificatoFGas?: string;
+  // Note
+  note?: string;
+  dataCreazione: string;
+  attivo: boolean;
+}
+
 export interface AppData {
   clienti: Cliente[];
   impianti: Impianto[];
   certificati: Certificato[];
   tecnico: Tecnico | null;
+  ditte: DittaInstallatrice[];
 }
