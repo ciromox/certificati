@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Certificato, Cliente, Impianto, Tecnico, TipoCertificato } from '../types';
+import { Certificato, Cliente, Impianto, Tecnico, TipoCertificato, DittaInstallatrice } from '../types';
 import { generateNumeroCertificato } from '../store';
+import GestioneMateriali from './GestioneMateriali';
 
 interface CertificatoFormMinisterialeProps {
   clienti: Cliente[];
   impianti: Impianto[];
   tecnico: Tecnico | null;
   certificati: Certificato[];
+  ditte: DittaInstallatrice[];
   editingCertificato: Certificato | null;
   onSave: (certificato: any) => void;
   onCancel: () => void;
@@ -17,6 +19,7 @@ export default function CertificatoFormMinisteriale({
   impianti,
   tecnico,
   certificati,
+  ditte,
   editingCertificato,
   onSave,
   onCancel
@@ -102,6 +105,32 @@ export default function CertificatoFormMinisteriale({
     setForm({ ...form, [field]: value });
   };
 
+  const handleDittaSelect = (dittaId: string) => {
+    if (!dittaId) return;
+    const ditta = ditte.find(d => d.id === dittaId);
+    if (!ditta) return;
+    
+    // Auto-compila tutti i campi della ditta
+    setForm({
+      ...form,
+      dichiaranteNome: ditta.legaleRappresentanteNome,
+      dichiaranteCognome: ditta.legaleRappresentanteCognome,
+      impresaRagioneSociale: ditta.ragioneSociale,
+      impresaSettore: ditta.settore,
+      impresaSedeLegaleIndirizzo: ditta.indirizzo,
+      impresaSedeLegaleNumero: ditta.numeroCivico,
+      impresaSedeLegaleComune: ditta.citta,
+      impresaSedeLegaleProvincia: ditta.provincia,
+      impresaSedeLegaleCAP: ditta.cap,
+      impresaPartitaIVA: ditta.partitaIva,
+      impresaCodiceFiscale: ditta.codiceFiscale || '',
+      impresaIscrizioneCCIAA: ditta.cciaa || '',
+      impresaIscrizioneCCIAANumero: ditta.cciaaNumero || '',
+      impresaIscrizioneAlboArtigiani: ditta.alboArtigiani || '',
+      impresaIscrizioneAlboArtigianiNumero: ditta.alboArtigianiNumero || '',
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -123,6 +152,33 @@ export default function CertificatoFormMinisteriale({
             <i className="fas fa-building text-blue-500"></i>
             Sezione A - Dati Dichiarante (Ditta Installatrice)
           </h2>
+          
+          {/* Select Ditta dall'Archivio */}
+          {ditte.length > 0 && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <label className="block text-sm font-medium text-blue-900 mb-2">
+                <i className="fas fa-search mr-1"></i>
+                Seleziona Ditta dall'Archivio (auto-compila i campi)
+              </label>
+              <select 
+                onChange={(e) => handleDittaSelect(e.target.value)}
+                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                defaultValue=""
+              >
+                <option value="">-- Seleziona una ditta --</option>
+                {ditte.filter(d => d.attivo).map(ditta => (
+                  <option key={ditta.id} value={ditta.id}>
+                    {ditta.ragioneSociale} - {ditta.settore} ({ditta.citta})
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-blue-700 mt-2">
+                <i className="fas fa-info-circle mr-1"></i>
+                I campi verranno auto-compilati con i dati della ditta selezionata. Potrai comunque modificarli manualmente se necessario.
+              </p>
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nome Dichiarante *</label>
@@ -258,6 +314,19 @@ export default function CertificatoFormMinisteriale({
               </select>
             </div>
           </div>
+        </div>
+
+        {/* SEZIONE 2.5: MATERIALI UTILIZZATI */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+            <i className="fas fa-boxes text-orange-500"></i>
+            Sezione B.2 - Materiali Utilizzati
+          </h2>
+          <GestioneMateriali
+            tipoImpianto={impianti.find(i => i.id === form.impiantoId)?.tipologia || ''}
+            materiali={form.materialiUtilizzati}
+            onChange={(materiali) => updateField('materialiUtilizzati', materiali)}
+          />
         </div>
 
         {/* SEZIONE 3: UBICAZIONE */}
