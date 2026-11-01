@@ -71,7 +71,7 @@ export default function SchedaPrint({ scheda, cliente, impianto, onBack }: Sched
             <div><span className="text-gray-500">Numero:</span> <span className="font-medium">{scheda.numero}</span></div>
             <div><span className="text-gray-500">Data Compilazione:</span> <span className="font-medium">{new Date(scheda.dataCompilazione).toLocaleDateString('it-IT')}</span></div>
             {scheda.dataValidita && <div><span className="text-gray-500">Data Validità:</span> <span className="font-medium">{new Date(scheda.dataValidita).toLocaleDateString('it-IT')}</span></div>}
-            <div><span className="text-gray-500">Stato:</span> <span className="font-medium">{scheda.stato.charAt(0).toUpperCase() + scheda.stato.slice(1)}</span></div>
+            <div><span className="text-gray-500">Stato:</span> <span className="font-medium">{scheda.stato ? scheda.stato.charAt(0).toUpperCase() + scheda.stato.slice(1) : 'N/D'}</span></div>
           </div>
         </div>
 
