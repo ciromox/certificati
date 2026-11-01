@@ -1,10 +1,13 @@
 import { Certificato, Cliente, Impianto, Tecnico } from '../types';
+import { SchedaTecnica } from '../schedeTecniche';
+import { SCHEDE_DEFINIZIONI, SchedaTipo } from '../schedeFields';
 
 interface CertificatoPrintMinisterialeProps {
   certificato: Certificato;
   cliente?: Cliente;
   impianto?: Impianto;
   tecnico: Tecnico | null;
+  schede?: SchedaTecnica[];
   onBack: () => void;
 }
 
@@ -13,6 +16,7 @@ export default function CertificatoPrintMinisteriale({
   cliente, 
   impianto, 
   tecnico, 
+  schede = [],
   onBack 
 }: CertificatoPrintMinisterialeProps) {
   
@@ -341,13 +345,178 @@ export default function CertificatoPrintMinisteriale({
         </div>
       </div>
 
+      {/* SCHEDE TECNICHE COLLEGATE */}
+      {schede.length > 0 && (
+        <div className="space-y-8">
+          <div className="text-center mb-6 print:hidden">
+            <h2 className="text-2xl font-bold text-gray-800">
+              <i className="fas fa-paperclip mr-2"></i>
+              Schede Tecniche Collegate ({schede.length})
+            </h2>
+            <p className="text-gray-600 mt-2">Allegati alla Dichiarazione di Conformità n. {certificato.numero}</p>
+          </div>
+
+          {schede.map((scheda, index) => {
+            const schedaDef = SCHEDE_DEFINIZIONI[scheda.tipo as SchedaTipo];
+            if (!schedaDef) return null;
+
+            return (
+              <div key={scheda.id} className="scheda-allegato bg-white shadow-lg border border-gray-300 p-8 md:p-12 max-w-4xl mx-auto print:shadow-none print:border-none print:p-0 page-break">
+                {/* Header Scheda */}
+                <div className="border-b-4 border-indigo-800 pb-6 mb-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      {tecnico && (
+                        <div className="mb-3">
+                          <h2 className="text-lg font-bold text-gray-800">{tecnico.nome} {tecnico.cognome}</h2>
+                          <p className="text-sm text-gray-600">{tecnico.partitaIva && `P.IVA: ${tecnico.partitaIva}`}</p>
+                          <p className="text-sm text-gray-600">{tecnico.indirizzo}, {tecnico.citta} ({tecnico.provincia})</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="bg-indigo-800 text-white px-4 py-2 rounded-lg">
+                        <p className="font-bold text-lg">{scheda.numero}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <h1 className="text-2xl font-bold text-indigo-800">{schedaDef.titolo}</h1>
+                    <p className="text-sm text-gray-600 mt-1">{schedaDef.norma}</p>
+                    <p className="text-xs text-gray-500 mt-1">Allegato n. {index + 1} di {schede.length}</p>
+                  </div>
+                </div>
+
+                {/* Committente */}
+                {cliente && (
+                  <div className="mb-6">
+                    <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                      <i className="fas fa-user text-blue-600"></i> COMMITTENTE
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div><span className="text-gray-500">Nome:</span> <span className="font-medium">{cliente.nome} {cliente.cognome}</span></div>
+                        {cliente.ragioneSociale && <div><span className="text-gray-500">Ragione Sociale:</span> <span className="font-medium">{cliente.ragioneSociale}</span></div>}
+                        <div><span className="text-gray-500">Cod. Fiscale:</span> <span className="font-medium">{cliente.codiceFiscale}</span></div>
+                        {cliente.partitaIva && <div><span className="text-gray-500">P. IVA:</span> <span className="font-medium">{cliente.partitaIva}</span></div>}
+                        <div className="col-span-2"><span className="text-gray-500">Residenza/Sede:</span> <span className="font-medium">{cliente.indirizzo}, {cliente.citta} ({cliente.provincia}) {cliente.cap}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Impianto */}
+                {impianto && (
+                  <div className="mb-6">
+                    <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                      <i className="fas fa-building text-green-600"></i> IMPIANTO
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div><span className="text-gray-500">Tipologia:</span> <span className="font-medium">{impianto.tipologia}</span></div>
+                        <div><span className="text-gray-500">Destinazione d'uso:</span> <span className="font-medium">{impianto.destinazioneUso}</span></div>
+                        <div className="col-span-2"><span className="text-gray-500">Ubicazione:</span> <span className="font-medium">{impianto.indirizzo}, {impianto.citta} ({impianto.provincia}) {impianto.cap}</span></div>
+                        {impianto.caratteristiche && <div className="col-span-2"><span className="text-gray-500">Caratteristiche:</span> <span className="font-medium">{impianto.caratteristiche}</span></div>}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Dati Specifici della Scheda */}
+                <div className="mb-6">
+                  <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <i className="fas fa-file text-indigo-600"></i> DATI SPECIFICI
+                  </h3>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    {Object.keys(scheda.dati).length > 0 ? (
+                      <div className="space-y-4">
+                        {schedaDef.sezioni.map((sezione, idx) => {
+                          const campiSezione = sezione.campi.filter(campo => scheda.dati[campo.id]);
+                          if (campiSezione.length === 0) return null;
+
+                          return (
+                            <div key={idx} className="border-b border-gray-200 pb-3 last:border-b-0">
+                              <h4 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                <i className={sezione.icon || 'fas fa-file'}></i>
+                                {sezione.titolo}
+                              </h4>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                {campiSezione.map(campo => {
+                                  const valore = scheda.dati[campo.id];
+                                  if (!valore) return null;
+
+                                  return (
+                                    <div key={campo.id} className={typeof valore === 'string' && valore.length > 50 ? 'col-span-2' : ''}>
+                                      <span className="text-gray-500">{campo.label}:</span>
+                                      <div className="font-medium mt-0.5">
+                                        {typeof valore === 'boolean' ? (valore ? '✓ Sì' : '✗ No') :
+                                         Array.isArray(valore) ? valore.join(', ') :
+                                         String(valore)}
+                                        {campo.unit && <span className="text-gray-500 ml-1">{campo.unit}</span>}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">Nessun dato specifico compilato</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Note */}
+                {scheda.note && (
+                  <div className="mb-6">
+                    <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                      <i className="fas fa-sticky-note text-yellow-600"></i> NOTE
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{scheda.note}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Firma */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Data di compilazione</p>
+                      <p className="font-bold text-gray-800">{new Date(scheda.dataCompilazione).toLocaleDateString('it-IT')}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Il Tecnico Responsabile</p>
+                      <div className="mt-8 border-b border-gray-400 pb-1">
+                        <p className="text-center text-sm text-gray-600 italic">
+                          {scheda.dati.tecnico || (tecnico ? `${tecnico.nome} ${tecnico.cognome}` : '___________________')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
+                  <p>Allegato n. {index + 1} di {schede.length} - {schedaDef.titolo}</p>
+                  <p className="mt-1">{schedaDef.norma}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Print styles */}
       <style>{`
         @media print {
           body * { visibility: hidden; }
           #certificato-page1, #certificato-page1 *,
-          #certificato-page2, #certificato-page2 * { visibility: visible; }
-          #certificato-page1, #certificato-page2 { 
+          #certificato-page2, #certificato-page2 *,
+          .scheda-allegato, .scheda-allegato * { visibility: visible; }
+          #certificato-page1, #certificato-page2, .scheda-allegato { 
             position: absolute; 
             left: 0; 
             top: 0; 

@@ -844,6 +844,156 @@ export const LIBRETTO_IMPIANTO: SchedaDefinizione = {
         { id: 'note_manutenzioni', label: 'Note Manutenzioni', tipo: 'textarea', sezione: 'manutenzioni' },
       ]
     },
+    {
+      id: 'proprietario_responsabile',
+      titolo: 'Proprietario/Responsabile Impianto',
+      icon: 'fas fa-user-tie',
+      campi: [
+        { id: 'proprietario_nome', label: 'Nome Proprietario', tipo: 'text', required: true, sezione: 'proprietario_responsabile' },
+        { id: 'proprietario_cognome', label: 'Cognome Proprietario', tipo: 'text', required: true, sezione: 'proprietario_responsabile' },
+        { id: 'proprietario_cf', label: 'Codice Fiscale', tipo: 'text', sezione: 'proprietario_responsabile' },
+        { id: 'proprietario_indirizzo', label: 'Indirizzo', tipo: 'text', sezione: 'proprietario_responsabile' },
+        { id: 'proprietario_telefono', label: 'Telefono', tipo: 'tel', sezione: 'proprietario_responsabile' },
+        { id: 'proprietario_email', label: 'Email', tipo: 'email', sezione: 'proprietario_responsabile' },
+        { id: 'terzo_responsabile', label: 'Terzo Responsabile (se nominato)', tipo: 'checkbox', sezione: 'proprietario_responsabile' },
+        { id: 'terzo_responsabile_nome', label: 'Nome Terzo Responsabile', tipo: 'text', sezione: 'proprietario_responsabile' },
+        { id: 'terzo_responsabile_empresa', label: 'Impresa Terzo Responsabile', tipo: 'text', sezione: 'proprietario_responsabile' },
+        { id: 'data_nomina_terzo', label: 'Data Nomina Terzo Responsabile', tipo: 'date', sezione: 'proprietario_responsabile' },
+      ]
+    },
+    {
+      id: 'installatore_originario',
+      titolo: 'Dati Installatore Originario',
+      icon: 'fas fa-hard-hat',
+      campi: [
+        { id: 'installatore_ragione_sociale', label: 'Ragione Sociale Installatore', tipo: 'text', sezione: 'installatore_originario' },
+        { id: 'installatore_piva', label: 'Partita IVA Installatore', tipo: 'text', sezione: 'installatore_originario' },
+        { id: 'installatore_indirizzo', label: 'Indirizzo Installatore', tipo: 'text', sezione: 'installatore_originario' },
+        { id: 'installatore_telefono', label: 'Telefono Installatore', tipo: 'tel', sezione: 'installatore_originario' },
+        { id: 'data_installazione', label: 'Data Installazione', tipo: 'date', sezione: 'installatore_originario' },
+        { id: 'numero_dico_originaria', label: 'Numero DiCo Originaria', tipo: 'text', sezione: 'installatore_originario' },
+        { id: 'data_dico_originaria', label: 'Data DiCo Originaria', tipo: 'date', sezione: 'installatore_originario' },
+      ]
+    },
+    {
+      id: 'locali_tecnici',
+      titolo: 'Caratteristiche Locali Tecnici',
+      icon: 'fas fa-home',
+      campi: [
+        { id: 'locale_caldaia', label: 'Locale Caldaia Presente', tipo: 'checkbox', sezione: 'locali_tecnici' },
+        { id: 'volume_locale', label: 'Volume Locale Tecnico', tipo: 'number', unit: 'm³', min: 0, sezione: 'locali_tecnici' },
+        { id: 'superficie_locale', label: 'Superficie Locale Tecnico', tipo: 'number', unit: 'm²', min: 0, sezione: 'locali_tecnici' },
+        { id: 'altezza_locale', label: 'Altezza Locale Tecnico', tipo: 'number', unit: 'm', min: 0, step: 0.1, sezione: 'locali_tecnici' },
+        { id: 'ventilazione_locale', label: 'Ventilazione Locale', tipo: 'select', sezione: 'locali_tecnici', options: [
+          { value: 'naturale', label: 'Naturale' },
+          { value: 'forzata', label: 'Forzata' },
+          { value: 'mista', label: 'Mista' }
+        ]},
+        { id: 'superficie_ventilazione', label: 'Superficie Ventilazione', tipo: 'number', unit: 'cm²', min: 0, sezione: 'locali_tecnici' },
+        { id: 'rilevatore_gas', label: 'Rilevatore Gas Installato', tipo: 'checkbox', sezione: 'locali_tecnici' },
+        { id: 'elettrovalvola', label: 'Elettrovalvola Gas', tipo: 'checkbox', sezione: 'locali_tecnici' },
+      ]
+    },
+    {
+      id: 'trattamento_acqua',
+      titolo: 'Sistema Trattamento Acqua',
+      icon: 'fas fa-tint',
+      campi: [
+        { id: 'trattamento_acqua_presente', label: 'Trattamento Acqua Presente', tipo: 'checkbox', sezione: 'trattamento_acqua' },
+        { id: 'filtro_disidratatore', label: 'Filtro Disidratatore', tipo: 'checkbox', sezione: 'trattamento_acqua' },
+        { id: 'addolcitore', label: 'Addolcitore', tipo: 'checkbox', sezione: 'trattamento_acqua' },
+        { id: 'dosaggio_inibitore', label: 'Dosaggio Inibitore Corrosione', tipo: 'checkbox', sezione: 'trattamento_acqua' },
+        { id: 'tipo_inibitore', label: 'Tipo Inibitore', tipo: 'text', sezione: 'trattamento_acqua' },
+        { id: 'data_trattamento', label: 'Data Ultimo Trattamento', tipo: 'date', sezione: 'trattamento_acqua' },
+        { id: 'ph_acqua', label: 'pH Acqua Impianto', tipo: 'number', min: 0, max: 14, step: 0.1, sezione: 'trattamento_acqua' },
+        { id: 'durezza_acqua', label: 'Durezza Acqua', tipo: 'number', unit: '°f', min: 0, sezione: 'trattamento_acqua' },
+      ]
+    },
+    {
+      id: 'combustione_aerazione',
+      titolo: 'Sistema Combustione e Aerazione',
+      icon: 'fas fa-wind',
+      campi: [
+        { id: 'presa_aria_combustione', label: 'Presa Aria Combustione', tipo: 'select', sezione: 'combustione_aerazione', options: [
+          { value: 'diretta', label: 'Diretta dall\'esterno' },
+          { value: 'locale', label: 'Dal locale tecnico' },
+          { value: 'canale', label: 'Canale dedicato' }
+        ]},
+        { id: 'superficie_presa_aria', label: 'Superficie Presa Aria', tipo: 'number', unit: 'cm²', min: 0, sezione: 'combustione_aerazione' },
+        { id: 'scarico_fumi_tipo', label: 'Tipo Scarico Fumi', tipo: 'select', sezione: 'combustione_aerazione', options: [
+          { value: 'canna_fumaria', label: 'Canna Fumaria' },
+          { value: 'parete', label: 'Scarico a Parete' },
+          { value: 'intubamento', label: 'Intubamento Canna Fumaria' }
+        ]},
+        { id: 'materiale_scarico', label: 'Materiale Scarico', tipo: 'select', sezione: 'combustione_aerazione', options: [
+          { value: 'acciaio_inox', label: 'Acciaio Inox' },
+          { value: 'alluminio', label: 'Alluminio' },
+          { value: 'materiale_plastico', label: 'Materiale Plastico' }
+        ]},
+        { id: 'diametro_scarico', label: 'Diametro Scarico', tipo: 'number', unit: 'mm', min: 0, sezione: 'combustione_aerazione' },
+        { id: 'lunghezza_scarico', label: 'Lunghezza Scarico', tipo: 'number', unit: 'm', min: 0, sezione: 'combustione_aerazione' },
+        { id: 'comignolo', label: 'Comignolo Installato', tipo: 'checkbox', sezione: 'combustione_aerazione' },
+        { id: 'altezza_comignolo', label: 'Altezza Comignolo', tipo: 'number', unit: 'm', min: 0, sezione: 'combustione_aerazione' },
+      ]
+    },
+    {
+      id: 'documentazione_tecnica',
+      titolo: 'Documentazione Tecnica',
+      icon: 'fas fa-folder-open',
+      campi: [
+        { id: 'libretto_uso_manutenzione', label: 'Libretto Uso e Manutenzione Generatore', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'scheda_tecnica_generatore', label: 'Scheda Tecnica Generatore', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'certificato_conformita_generatore', label: 'Certificato Conformità Generatore (CE)', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'dichiarazione_conformita_impianto', label: 'Dichiarazione Conformità Impianto', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'progetto_impianto', label: 'Progetto Impianto', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'schema_impianto', label: 'Schema Impianto', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'manuale_utente', label: 'Manuale Utente', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'certificati_materiali', label: 'Certificati Materiali', tipo: 'checkbox', sezione: 'documentazione_tecnica' },
+        { id: 'note_documentazione', label: 'Note Documentazione', tipo: 'textarea', sezione: 'documentazione_tecnica' },
+      ]
+    },
+    {
+      id: 'efficientamento_energetico',
+      titolo: 'Interventi Efficientamento Energetico',
+      icon: 'fas fa-leaf',
+      campi: [
+        { id: 'valvole_termostatiche_installate', label: 'Valvole Termostatiche Installate', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'cronotermostato_installato', label: 'Cronotermostato Installato', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'sonda_esterna_installata', label: 'Sonda Esterna Installata', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'isolamento_tubazioni', label: 'Isolamento Tubazioni', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'pompa_circolazione_efficiente', label: 'Pompa Circolazione ad Alta Efficienza', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'regolazione_clima', label: 'Sistema Regolazione Climatica', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'contabilizzazione_calore', label: 'Contabilizzazione Calore', tipo: 'checkbox', sezione: 'efficientamento_energetico' },
+        { id: 'data_intervento_efficientamento', label: 'Data Intervento Efficientamento', tipo: 'date', sezione: 'efficientamento_energetico' },
+        { id: 'risparmio_energetico_stimato', label: 'Risparmio Energetico Stimato', tipo: 'number', unit: '%', min: 0, max: 100, sezione: 'efficientamento_energetico' },
+        { id: 'note_efficientamento', label: 'Note Interventi', tipo: 'textarea', sezione: 'efficientamento_energetico' },
+      ]
+    },
+    {
+      id: 'verifiche_controlli',
+      titolo: 'Verifiche e Controlli Periodici',
+      icon: 'fas fa-clipboard-check',
+      campi: [
+        { id: 'tipo_verifica', label: 'Tipo Verifica', tipo: 'select', sezione: 'verifiche_controlli', options: [
+          { value: 'manutenzione_ordinaria', label: 'Manutenzione Ordinaria' },
+          { value: 'manutenzione_straordinaria', label: 'Manutenzione Straordinaria' },
+          { value: 'controllo_efficienza', label: 'Controllo Efficienza Energetica' },
+          { value: 'verifica_fumi', label: 'Verifica Fumi' },
+          { value: 'controllo_periodico', label: 'Controllo Periodico' }
+        ]},
+        { id: 'data_verifica', label: 'Data Verifica', tipo: 'date', sezione: 'verifiche_controlli' },
+        { id: 'esito_verifica', label: 'Esito Verifica', tipo: 'radio', sezione: 'verifiche_controlli', options: [
+          { value: 'positivo', label: 'Positivo' },
+          { value: 'positivo_prescrizioni', label: 'Positivo con Prescrizioni' },
+          { value: 'negativo', label: 'Negativo' }
+        ]},
+        { id: 'operatore_verifica', label: 'Operatore che ha effettuato la Verifica', tipo: 'text', sezione: 'verifiche_controlli' },
+        { id: 'impresa_verifica', label: 'Impresa Verificatrice', tipo: 'text', sezione: 'verifiche_controlli' },
+        { id: 'numero Rapporto', label: 'Numero Rapporto Verifica', tipo: 'text', sezione: 'verifiche_controlli' },
+        { id: 'prossima_verifica', label: 'Data Prossima Verifica', tipo: 'date', sezione: 'verifiche_controlli' },
+        { id: 'note_verifica', label: 'Note Verifica', tipo: 'textarea', sezione: 'verifiche_controlli' },
+      ]
+    },
   ]
 };
 

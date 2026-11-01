@@ -289,6 +289,7 @@ export default function App() {
             cliente={data.clienti.find(c => c.id === printingCertificato.clienteId)}
             impianto={data.impianti.find(i => i.id === printingCertificato.impiantoId)}
             tecnico={data.tecnico}
+            schede={schede.filter(s => s.impiantoId === printingCertificato.impiantoId)}
             onBack={() => { setPrintingCertificato(null); setCurrentPage('certificati'); }}
           />
         ) : null;
