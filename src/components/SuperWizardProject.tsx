@@ -386,7 +386,7 @@ export default function SuperWizardProject({
                         <p className="font-semibold text-gray-800">{def?.titolo || tipo}</p>
                         <p className="text-xs text-gray-600 mt-1">{def?.norma || ''}</p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {def?.sezioni.length || 0} sezioni • {def?.sezioni.reduce((acc, s) => acc + s.campi.length, 0) || 0} campi da compilare
+                          {def?.sezioni?.length || 0} sezioni • {def?.sezioni?.reduce((acc, s) => acc + (s?.campi?.length || 0), 0) || 0} campi da compilare
                         </p>
                       </div>
                     </div>

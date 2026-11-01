@@ -13,10 +13,10 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
   const [dati, setDati] = useState<Record<string, any>>(datiIniziali);
   const [sezioneCorrente, setSezioneCorrente] = useState(0);
 
-  if (!definizione) {
+  if (!definizione || !definizione.sezioni) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">Tipo scheda non valido: {tipoScheda}</p>
+        <p className="text-red-800">Tipo scheda non valido o configurazione incompleta: {tipoScheda}</p>
       </div>
     );
   }
@@ -229,7 +229,14 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
     }
   };
 
-  const sezioneCorrenteDef = definizione.sezioni[sezioneCorrente];
+  const sezioneCorrenteDef = definizione.sezioni?.[sezioneCorrente];
+  if (!sezioneCorrenteDef || !sezioneCorrenteDef.campi) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <p className="text-red-800">Sezione non disponibile o incompleta</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,7 +255,7 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
       {/* Navigation Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">
         <div className="flex gap-2 overflow-x-auto">
-          {definizione.sezioni.map((sezione, index) => (
+          {definizione.sezioni?.map((sezione, index) => (
             <button
               key={sezione.id}
               onClick={() => setSezioneCorrente(index)}
@@ -273,7 +280,7 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
             {sezioneCorrenteDef?.titolo || 'Sezione'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sezioneCorrenteDef.campi.map(campo => renderCampo(campo))}
+            {sezioneCorrenteDef?.campi?.map(campo => renderCampo(campo))}
           </div>
         </div>
 
@@ -290,7 +297,7 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
           </button>
           
           <div className="flex gap-3">
-            {sezioneCorrente < definizione.sezioni.length - 1 ? (
+            {sezioneCorrente < (definizione.sezioni?.length || 1) - 1 ? (
               <button
                 type="button"
                 onClick={() => setSezioneCorrente(sezioneCorrente + 1)}
@@ -315,13 +322,13 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
       {/* Progress Indicator */}
       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>Sezione {sezioneCorrente + 1} di {definizione.sezioni.length}</span>
-          <span>{Math.round(((sezioneCorrente + 1) / definizione.sezioni.length) * 100)}% completato</span>
+          <span>Sezione {sezioneCorrente + 1} di {definizione.sezioni?.length || 1}</span>
+          <span>{Math.round(((sezioneCorrente + 1) / (definizione.sezioni?.length || 1)) * 100)}% completato</span>
         </div>
         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all"
-            style={{ width: `${((sezioneCorrente + 1) / definizione.sezioni.length) * 100}%` }}
+            style={{ width: `${((sezioneCorrente + 1) / (definizione.sezioni?.length || 1)) * 100}%` }}
           ></div>
         </div>
       </div>

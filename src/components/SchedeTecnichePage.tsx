@@ -126,12 +126,12 @@ export default function SchedeTecnichePage({ schede = [], clienti = [], impianti
                   <i className="fas fa-file-alt text-blue-600 text-xl"></i>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-gray-800 mb-1">{def.titolo}</h3>
-                  <p className="text-xs text-blue-600 mb-2">{def.norma}</p>
-                  <p className="text-sm text-gray-600">{def.descrizione}</p>
+                  <h3 className="font-bold text-gray-800 mb-1">{def?.titolo || tipo}</h3>
+                  <p className="text-xs text-blue-600 mb-2">{def?.norma || ''}</p>
+                  <p className="text-sm text-gray-600">{def?.descrizione || ''}</p>
                   <p className="text-xs text-gray-500 mt-2">
                     <i className="fas fa-list mr-1"></i>
-                    {def.sezioni.length} sezioni • {def.sezioni.reduce((acc, s) => acc + s.campi.length, 0)} campi
+                    {def?.sezioni?.length || 0} sezioni • {def?.sezioni?.reduce((acc, s) => acc + (s?.campi?.length || 0), 0) || 0} campi
                   </p>
                 </div>
               </div>

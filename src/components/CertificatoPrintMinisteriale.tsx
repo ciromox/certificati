@@ -381,8 +381,8 @@ export default function CertificatoPrintMinisteriale({
                     </div>
                   </div>
                   <div className="mt-4 text-center">
-                    <h1 className="text-2xl font-bold text-indigo-800">{schedaDef.titolo}</h1>
-                    <p className="text-sm text-gray-600 mt-1">{schedaDef.norma}</p>
+                    <h1 className="text-2xl font-bold text-indigo-800">{schedaDef?.titolo || scheda.tipo}</h1>
+                    <p className="text-sm text-gray-600 mt-1">{schedaDef?.norma || ''}</p>
                     <p className="text-xs text-gray-500 mt-1">Allegato n. {index + 1} di {schede.length}</p>
                   </div>
                 </div>
@@ -430,7 +430,8 @@ export default function CertificatoPrintMinisteriale({
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     {Object.keys(scheda.dati).length > 0 ? (
                       <div className="space-y-4">
-                        {schedaDef.sezioni.map((sezione, idx) => {
+                        {schedaDef.sezioni?.map((sezione, idx) => {
+                          if (!sezione || !sezione.campi) return null;
                           const campiSezione = sezione.campi.filter(campo => scheda.dati[campo.id]);
                           if (campiSezione.length === 0) return null;
 
@@ -500,8 +501,8 @@ export default function CertificatoPrintMinisteriale({
 
                 {/* Footer */}
                 <div className="mt-8 pt-4 border-t border-gray-200 text-center text-xs text-gray-400">
-                  <p>Allegato n. {index + 1} di {schede.length} - {schedaDef.titolo}</p>
-                  <p className="mt-1">{schedaDef.norma}</p>
+                  <p>Allegato n. {index + 1} di {schede.length} - {schedaDef?.titolo || scheda.tipo}</p>
+                  <p className="mt-1">{schedaDef?.norma || ''}</p>
                 </div>
               </div>
             );
