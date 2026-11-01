@@ -12,7 +12,15 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
   const [formData, setFormData] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  if (!config) {
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Configurazione scheda non disponibile</div>;
+  }
+
   const sezioneCorrente = config.sezioni[currentSezione];
+  if (!sezioneCorrente) {
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Sezione non disponibile</div>;
+  }
+  
   const totaleSezioni = config.sezioni.length;
   const progresso = ((currentSezione + 1) / totaleSezioni) * 100;
 
@@ -223,7 +231,7 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold flex items-center gap-3">
-                <i className={config.icon}></i>
+                <i className={config.icon || 'fas fa-file'}></i>
                 {config.label}
               </h2>
               <p className="text-blue-200 text-sm mt-1">{config.norma}</p>
@@ -275,7 +283,7 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
                   {index < currentSezione ? (
                     <i className="fas fa-check"></i>
                   ) : (
-                    <i className={`${sezione.icon} text-xs`}></i>
+                    <i className={`${sezione.icon || 'fas fa-file'} text-xs`}></i>
                   )}
                 </div>
                 <span className="text-xs mt-1 text-center hidden md:block max-w-[80px]">
@@ -290,11 +298,11 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
         <div className="flex-1 overflow-y-auto p-6">
           <div className="mb-6">
             <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
-              <i className={`${sezioneCorrente.icon} text-blue-600`}></i>
-              {sezioneCorrente.titolo}
+              <i className={`${sezioneCorrente?.icon || 'fas fa-file'} text-blue-600`}></i>
+              {sezioneCorrente?.titolo || 'Sezione'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sezioneCorrente.campi.map(renderCampo)}
+              {sezioneCorrente?.campi.map(renderCampo)}
             </div>
           </div>
         </div>

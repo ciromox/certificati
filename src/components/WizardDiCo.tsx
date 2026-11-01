@@ -530,7 +530,7 @@ export default function WizardDiCo({ clienti, impianti, tecnico, certificati, on
                   {step.id < currentStep ? (
                     <i className="fas fa-check"></i>
                   ) : (
-                    <i className={`${step.icon} text-xs`}></i>
+                    <i className={`${step.icon || 'fas fa-file'} text-xs`}></i>
                   )}
                 </div>
                 <span className="text-xs mt-1 text-center hidden md:block">{step.title}</span>

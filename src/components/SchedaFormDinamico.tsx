@@ -258,7 +258,7 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <i className={sezione.icon}></i>
+              <i className={sezione.icon || 'fas fa-file'}></i>
               <span className="text-sm font-medium">{sezione.titolo}</span>
             </button>
           ))}
@@ -269,8 +269,8 @@ export default function SchedaFormDinamico({ tipoScheda, datiIniziali = {}, onSa
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h2 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
-            <i className={`${sezioneCorrenteDef.icon} text-blue-500`}></i>
-            {sezioneCorrenteDef.titolo}
+            <i className={`${sezioneCorrenteDef?.icon || 'fas fa-file'} text-blue-500`}></i>
+            {sezioneCorrenteDef?.titolo || 'Sezione'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sezioneCorrenteDef.campi.map(campo => renderCampo(campo))}

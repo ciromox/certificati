@@ -15,7 +15,7 @@ export default function InfoTooltip({ text, title, type = 'info' }: InfoTooltipP
     help: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', icon: 'fa-question-circle text-purple-500' },
   };
 
-  const color = colors[type];
+  const color = colors[type] || colors.info; // Fallback a 'info' se type non valido
 
   return (
     <div className="relative inline-block">
@@ -26,7 +26,7 @@ export default function InfoTooltip({ text, title, type = 'info' }: InfoTooltipP
         onClick={() => setShow(!show)}
         className={`ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full ${color.bg} ${color.border} border`}
       >
-        <i className={`fas ${color.icon} text-xs`}></i>
+        <i className={`fas ${color.icon || 'fa-info-circle'} text-xs`}></i>
       </button>
       
       {show && (

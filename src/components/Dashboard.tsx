@@ -78,7 +78,7 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
             className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-gray-100 text-left"
           >
             <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center mb-3`}>
-              <i className={`${stat.icon} text-white`}></i>
+              <i className={`${stat.icon || 'fas fa-circle'} text-white`}></i>
             </div>
             <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
             <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
