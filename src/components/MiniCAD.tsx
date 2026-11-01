@@ -1126,8 +1126,8 @@ export default function MiniCAD({ elementi, onChange, onClose, impiantoId }: Min
               <div className="grid grid-cols-2 gap-2">
                 {simboli.map(s => (
                   <button key={s.id} onClick={() => setSelectedSymbol(s.id)} className={`p-2 rounded-lg text-center transition ${selectedSymbol === s.id ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-200'}`}>
-                    <div className="text-2xl mb-1">{s.icon}</div>
-                    <div className="text-xs">{s.label}</div>
+                    <div className="text-2xl mb-1">{s.icon || '⚙️'}</div>
+                    <div className="text-xs">{s.label || s.id}</div>
                   </button>
                 ))}
               </div>

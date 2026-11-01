@@ -68,7 +68,7 @@ export default function Sidebar({ currentPage, onNavigate, onExport, onImport, i
               }
             `}
           >
-            <i className={`${item.icon} w-5 text-center`}></i>
+            <i className={`${item.icon || 'fas fa-circle'} w-5 text-center`}></i>
             <span className="font-medium">{item.label}</span>
           </button>
         ))}

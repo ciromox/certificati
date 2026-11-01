@@ -41,6 +41,7 @@ export default function StampaMultiplaSchede({ schede, cliente, impianto, tecnic
       <div id="schede-print-container" className="space-y-8">
         {schede.map((scheda, index) => {
           const config = CONFIG_SCHEDE[scheda.tipo];
+          if (!config) return null; // Sicurezza: salta se config è undefined
           return (
             <div key={scheda.id} className="scheda-print-page bg-white rounded-xl shadow-lg border border-gray-200 p-8 md:p-12 print:shadow-none print:border-none print:p-4 page-break">
               {/* Header */}

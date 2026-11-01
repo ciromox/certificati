@@ -246,7 +246,7 @@ export default function ArchivioAllegati({
               filtroCategoria === c.value ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'
             }`}
           >
-            <i className={`${c.icon} mr-1`}></i>
+            <i className={`${c.icon || 'fas fa-file'} mr-1`}></i>
             {c.label}
           </button>
         ))}
@@ -279,7 +279,7 @@ export default function ArchivioAllegati({
                     />
                   ) : (
                     <div className="text-center">
-                      <i className={`${catInfo.icon} text-3xl text-gray-400`}></i>
+                      <i className={`${catInfo?.icon || 'fas fa-file'} text-3xl text-gray-400`}></i>
                       <p className="text-xs text-gray-500 mt-1">{allegato.tipo.split('/')[1]?.toUpperCase()}</p>
                     </div>
                   )}
@@ -335,7 +335,7 @@ export default function ArchivioAllegati({
                   {isImage(allegato.tipo) ? (
                     <img src={allegato.dataUrl} alt="" className="w-full h-full object-cover rounded" />
                   ) : (
-                    <i className={`${catInfo.icon} text-gray-400`}></i>
+                    <i className={`${catInfo?.icon || 'fas fa-file'} text-gray-400`}></i>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -343,7 +343,7 @@ export default function ArchivioAllegati({
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>{formatFileSize(allegato.dimensione)}</span>
                     <span>•</span>
-                    <span>{catInfo.label}</span>
+                    <span>{catInfo?.label || 'Altro'}</span>
                     <span>•</span>
                     <span>{new Date(allegato.data).toLocaleDateString('it-IT')}</span>
                   </div>
@@ -387,7 +387,7 @@ export default function ArchivioAllegati({
               <div>
                 <h3 className="font-bold text-gray-800">{previewAllegato.nome}</h3>
                 <p className="text-xs text-gray-500">
-                  {formatFileSize(previewAllegato.dimensione)} • {getCategoriaInfo(previewAllegato.categoria).label}
+                  {formatFileSize(previewAllegato.dimensione)} • {getCategoriaInfo(previewAllegato.categoria)?.label || 'Altro'}
                 </p>
               </div>
               <div className="flex gap-2">

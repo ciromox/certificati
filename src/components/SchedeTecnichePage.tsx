@@ -162,6 +162,7 @@ export default function SchedeTecnichePage({ schede = [], clienti = [], impianti
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {(Object.keys(CONFIG_SCHEDE) as TipoSchedaTecnica[]).map(tipo => {
           const config = CONFIG_SCHEDE[tipo];
+          if (!config) return null; // Sicurezza: salta se config è undefined
           const count = schede.filter(s => s.tipo === tipo).length;
           return (
             <button
@@ -174,7 +175,7 @@ export default function SchedeTecnichePage({ schede = [], clienti = [], impianti
               }`}
             >
               <div className={`w-8 h-8 rounded-lg bg-${config.color}-100 flex items-center justify-center mb-2`}>
-                <i className={`${config.icon} text-${config.color}-600 text-sm`}></i>
+                <i className={`${config.icon || 'fas fa-file'} text-${config.color}-600 text-sm`}></i>
               </div>
               <p className="font-medium text-xs text-gray-800 leading-tight">{config.label}</p>
               <p className="text-xs text-gray-500 mt-1">{count} schede</p>
@@ -247,12 +248,13 @@ export default function SchedeTecnichePage({ schede = [], clienti = [], impianti
         <div className="space-y-3">
           {filtered.map(scheda => {
             const config = CONFIG_SCHEDE[scheda.tipo];
+            if (!config) return null; // Sicurezza: salta se config è undefined
             return (
               <div key={scheda.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-${config.color}-100`}>
-                      <i className={`${config.icon} text-lg text-${config.color}-600`}></i>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 bg-${config.color || 'gray'}-100`}>
+                      <i className={`${config.icon || 'fas fa-file'} text-lg text-${config.color || 'gray'}-600`}></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">

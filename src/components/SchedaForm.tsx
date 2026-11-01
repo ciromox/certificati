@@ -22,6 +22,9 @@ export default function SchedaForm({ scheda, clienti, impianti, onSave, onCancel
   const [note, setNote] = useState(scheda?.note || '');
 
   const config = CONFIG_SCHEDE[tipo];
+  if (!config) {
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Configurazione scheda non trovata per il tipo: {tipo}</div>;
+  }
 
   // Verifica conformità scheda
   const checkSchedaConformita = (): { valid: boolean; issues: string[] } => {
