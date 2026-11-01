@@ -367,10 +367,12 @@ export default function App() {
           tecnico={data.tecnico}
           certificati={data.certificati}
           schede={schede}
+          ditte={data.ditte}
           onComplete={handleSuperWizardComplete}
           onCancel={() => setShowSuperWizard(false)}
           onCreaCliente={handleAddCliente}
           onCreaImpianto={handleAddImpianto}
+          onCreaDitta={handleAddDitta}
         />
       )}
     </div>
