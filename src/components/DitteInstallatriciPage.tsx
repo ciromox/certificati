@@ -47,7 +47,7 @@ const ABILITAZIONI_DM_37_08 = [
   { value: 'g', label: 'Lettera g) - Ascensori/montacarichi' },
 ];
 
-export default function DitteInstallatriciPage({ ditte, onAdd, onUpdate, onDelete }: DitteInstallatriciPageProps) {
+export default function DitteInstallatriciPage({ ditte = [], onAdd, onUpdate, onDelete }: DitteInstallatriciPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<DittaInstallatrice | null>(null);
   const [form, setForm] = useState(emptyForm);

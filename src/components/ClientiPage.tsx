@@ -15,7 +15,7 @@ const emptyForm = {
   indirizzo: '', citta: '', cap: '', provincia: '', telefono: '', email: '',
 };
 
-export default function ClientiPage({ clienti, onAdd, onUpdate, onDelete }: ClientiPageProps) {
+export default function ClientiPage({ clienti = [], onAdd, onUpdate, onDelete }: ClientiPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Cliente | null>(null);
   const [form, setForm] = useState(emptyForm);

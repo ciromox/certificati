@@ -18,7 +18,15 @@ export function loadData(): AppData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      return JSON.parse(raw);
+      const data = JSON.parse(raw);
+      // Migrazione dati: aggiungi campi mancanti per compatibilità
+      return {
+        clienti: data.clienti || [],
+        impianti: data.impianti || [],
+        certificati: data.certificati || [],
+        tecnico: data.tecnico || null,
+        ditte: data.ditte || [],
+      };
     }
   } catch (e) {
     console.error('Errore caricamento dati:', e);
@@ -226,7 +234,7 @@ export function addDitta(data: AppData, ditta: Omit<DittaInstallatrice, 'id' | '
     id: generateId(),
     dataCreazione: new Date().toISOString(),
   };
-  const newData = { ...data, ditte: [...data.ditte, newDitta] };
+  const newData = { ...data, ditte: [...(data.ditte || []), newDitta] };
   saveData(newData);
   return newData;
 }
@@ -234,7 +242,7 @@ export function addDitta(data: AppData, ditta: Omit<DittaInstallatrice, 'id' | '
 export function updateDitta(data: AppData, ditta: DittaInstallatrice): AppData {
   const newData = {
     ...data,
-    ditte: data.ditte.map(d => d.id === ditta.id ? ditta : d),
+    ditte: (data.ditte || []).map(d => d.id === ditta.id ? ditta : d),
   };
   saveData(newData);
   return newData;
@@ -243,7 +251,7 @@ export function updateDitta(data: AppData, ditta: DittaInstallatrice): AppData {
 export function deleteDitta(data: AppData, id: string): AppData {
   const newData = {
     ...data,
-    ditte: data.ditte.filter(d => d.id !== id),
+    ditte: (data.ditte || []).filter(d => d.id !== id),
   };
   saveData(newData);
   return newData;

@@ -8,12 +8,12 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ data, schede = [], onNavigate }: DashboardProps) {
-  const { clienti, impianti, certificati, ditte = [] } = data;
+  const { clienti = [], impianti = [], certificati = [], ditte = [] } = data;
   
   const certificatiAttivi = certificati.filter(c => c.stato === 'emesso');
   const certificatiBozza = certificati.filter(c => c.stato === 'bozza');
   const certificatiScaduti = certificati.filter(c => c.stato === 'scaduto');
-  const ditteAttive = ditte.filter(d => d.attivo);
+  const ditteAttive = (ditte || []).filter(d => d.attivo);
   
   const stats = [
     { label: 'Clienti', value: clienti.length, icon: 'fas fa-users', color: 'bg-blue-500', page: 'clienti' },
