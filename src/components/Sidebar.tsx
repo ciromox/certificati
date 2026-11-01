@@ -15,6 +15,7 @@ export default function Sidebar({ currentPage, onNavigate, onExport, onImport, i
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
     { id: 'clienti', label: 'Clienti', icon: 'fas fa-users' },
+    { id: 'ditte', label: 'Ditte Installatrici', icon: 'fas fa-industry' },
     { id: 'impianti', label: 'Impianti', icon: 'fas fa-building' },
     { id: 'certificati', label: 'Certificati', icon: 'fas fa-file-certificate' },
     { id: 'schede', label: 'Schede Tecniche', icon: 'fas fa-file-medical' },

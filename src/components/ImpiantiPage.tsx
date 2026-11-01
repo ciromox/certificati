@@ -36,7 +36,7 @@ const emptyForm = {
 const getTipologiaLabel = (t: string) => tipologie.find(x => x.value === t)?.label || t;
 const getTipologiaIcon = (t: string) => tipologie.find(x => x.value === t)?.icon || 'fas fa-cog';
 
-export default function ImpiantiPage({ impianti, clienti, schemiCad, onAdd, onUpdate, onDelete, onOpenCAD }: ImpiantiPageProps) {
+export default function ImpiantiPage({ impianti = [], clienti = [], schemiCad = {}, onAdd, onUpdate, onDelete, onOpenCAD }: ImpiantiPageProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Impianto | null>(null);
   const [form, setForm] = useState(emptyForm);

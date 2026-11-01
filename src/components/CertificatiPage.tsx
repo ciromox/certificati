@@ -15,7 +15,7 @@ interface CertificatiPageProps {
   onWizard?: () => void;
 }
 
-export default function CertificatiPage({ certificati, clienti, impianti, schede, onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
+export default function CertificatiPage({ certificati = [], clienti = [], impianti = [], schede = [], onAdd, onEdit, onDelete, onPrint, onWizard }: CertificatiPageProps) {
   const [search, setSearch] = useState('');
   const [filterTipo, setFilterTipo] = useState('');
   const [filterStato, setFilterStato] = useState('');

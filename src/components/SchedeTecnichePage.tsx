@@ -14,7 +14,7 @@ interface SchedeTecnichePageProps {
   onDelete: (id: string) => void;
 }
 
-export default function SchedeTecnichePage({ schede, clienti, impianti, onAdd, onUpdate, onDelete }: SchedeTecnichePageProps) {
+export default function SchedeTecnichePage({ schede = [], clienti = [], impianti = [], onAdd, onUpdate, onDelete }: SchedeTecnichePageProps) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<SchedaTecnica | null>(null);
   const [printing, setPrinting] = useState<SchedaTecnica | null>(null);
