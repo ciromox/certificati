@@ -70,31 +70,31 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold w-1/3">Il/La sottoscritto/a</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.dichiaranteNome} {certificato.dichiaranteCognome}
+                  {certificato.dichiaranteNome || ''} {certificato.dichiaranteCognome || ''}
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">titolare/legale rappresentante dell'impresa</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.impresaRagioneSociale}
+                  {certificato.impresaRagioneSociale || ''}
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">operante nel settore</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.impresaSettore}
+                  {certificato.impresaSettore || ''}
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">con sede legale in</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.impresaSedeLegaleIndirizzo} n. {certificato.impresaSedeLegaleNumero}, {certificato.impresaSedeLegaleComune} ({certificato.impresaSedeLegaleProvincia}) CAP {certificato.impresaSedeLegaleCAP}
+                  {certificato.impresaSedeLegaleIndirizzo || ''} n. {certificato.impresaSedeLegaleNumero || ''}, {certificato.impresaSedeLegaleComune || ''} ({certificato.impresaSedeLegaleProvincia || ''}) CAP {certificato.impresaSedeLegaleCAP || ''}
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">P. IVA</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.impresaPartitaIVA}
+                  {certificato.impresaPartitaIVA || ''}
                 </td>
               </tr>
               {certificato.impresaIscrizioneCCIAA && (
@@ -124,13 +124,13 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold w-1/3">esecutrice dell'impianto</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.descrizioneImpianto}
+                  {certificato.descrizioneImpianto || ''}
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">inteso come</td>
                 <td className="py-2 border-b border-gray-400">
-                  ☐ {getTipoInterventoLabel(certificato.tipoIntervento)}
+                  ☐ {getTipoInterventoLabel(certificato.tipoIntervento || '')}
                   {certificato.tipoIntervento === 'altro' && certificato.tipoInterventoAltro && ` (${certificato.tipoInterventoAltro})`}
                 </td>
               </tr>
@@ -153,7 +153,7 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold">commissionato da</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.committenteNome} {certificato.committenteCognome || ''} {certificato.committenteRagioneSociale || ''}
+                  {certificato.committenteNome || ''} {certificato.committenteCognome || ''} {certificato.committenteRagioneSociale || ''}
                 </td>
               </tr>
             </tbody>
@@ -167,13 +167,13 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold w-1/3">installato nei locali siti nel comune di</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.ubicazioneComune} ({certificato.ubicazioneProvincia})
+                  {certificato.ubicazioneComune || ''} ({certificato.ubicazioneProvincia || ''})
                 </td>
               </tr>
               <tr>
                 <td className="py-2 font-semibold">indirizzo</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.ubicazioneIndirizzo} n. {certificato.ubicazioneNumero}
+                  {certificato.ubicazioneIndirizzo || ''} n. {certificato.ubicazioneNumero || ''}
                   {certificato.ubicazioneScala && ` scala ${certificato.ubicazioneScala}`}
                   {certificato.ubicazionePiano && ` piano ${certificato.ubicazionePiano}`}
                   {certificato.ubicazioneInterno && ` int. ${certificato.ubicazioneInterno}`}
@@ -182,7 +182,7 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold">di proprietà di</td>
                 <td className="py-2 border-b border-gray-400">
-                  {certificato.proprietarioNome} {certificato.proprietarioCognome || ''} {certificato.proprietarioRagioneSociale || ''}
+                  {certificato.proprietarioNome || ''} {certificato.proprietarioCognome || ''} {certificato.proprietarioRagioneSociale || ''}
                 </td>
               </tr>
               {certificato.proprietarioComune && (
@@ -204,7 +204,7 @@ export default function CertificatoPrintMinisteriale({
               <tr>
                 <td className="py-2 font-semibold">in edificio adibito ad uso</td>
                 <td className="py-2 border-b border-gray-400">
-                  ☐ {getUsoEdificioLabel(certificato.usoEdificio)}
+                  ☐ {getUsoEdificioLabel(certificato.usoEdificio || '')}
                 </td>
               </tr>
             </tbody>

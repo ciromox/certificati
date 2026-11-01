@@ -258,7 +258,7 @@ export default function SchedeTecnichePage({ schede, clienti, impianti, onAdd, o
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-bold text-gray-800">{scheda.numero}</p>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatoBadge(scheda.stato)}`}>
-                          {scheda.stato.charAt(0).toUpperCase() + scheda.stato.slice(1)}
+                          {scheda.stato ? scheda.stato.charAt(0).toUpperCase() + scheda.stato.slice(1) : 'N/D'}
                         </span>
                       </div>
                       <p className="text-sm font-medium text-gray-700 mt-1">{config.label}</p>

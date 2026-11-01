@@ -178,7 +178,7 @@ export default function CertificatiPage({ certificati, clienti, impianti, schede
                         {cert.tipo}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatoBadge(cert.stato)}`}>
-                        {cert.stato.charAt(0).toUpperCase() + cert.stato.slice(1)}
+                        {cert.stato ? cert.stato.charAt(0).toUpperCase() + cert.stato.slice(1) : 'N/D'}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">{getClienteNome(cert.clienteId)}</p>

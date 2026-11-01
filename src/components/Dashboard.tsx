@@ -253,7 +253,7 @@ export default function Dashboard({ data, schede = [], onNavigate }: DashboardPr
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatoBadge(cert.stato)}`}>
-                    {cert.stato.charAt(0).toUpperCase() + cert.stato.slice(1)}
+                    {cert.stato ? cert.stato.charAt(0).toUpperCase() + cert.stato.slice(1) : 'N/D'}
                   </span>
                   <span className="text-sm text-gray-400">{new Date(cert.dataRilascio).toLocaleDateString('it-IT')}</span>
                 </div>
