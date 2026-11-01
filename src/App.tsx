@@ -258,6 +258,7 @@ export default function App() {
             impianti={data.impianti}
             tecnico={data.tecnico}
             certificati={data.certificati}
+            ditte={data.ditte}
             editingCertificato={editingCertificato}
             onSave={editingCertificato ? handleUpdateCertificato : handleAddCertificato}
             onCancel={() => { setEditingCertificato(null); setCurrentPage('certificati'); }}

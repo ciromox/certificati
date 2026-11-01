@@ -125,7 +125,13 @@ export interface Certificato {
   
   // DATI TECNICI
   descrizioneLavoro: string;
-  materialiUtilizzati: string[];
+  materialiUtilizzati: Array<{
+    nome: string;
+    quantita: number;
+    unitaMisura: string;
+    descrizione?: string;
+    normaRiferimento?: string;
+  }>;
   verificheEffettuate: string;
   conformitaNorme: string[];
   note?: string;
