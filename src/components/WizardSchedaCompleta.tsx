@@ -12,16 +12,16 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
   const [formData, setFormData] = useState<any>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  if (!config) {
-    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Configurazione scheda non disponibile</div>;
+  if (!config || !config.sezioni) {
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Configurazione scheda non disponibile o incompleta</div>;
   }
 
-  const sezioneCorrente = config.sezioni[currentSezione];
-  if (!sezioneCorrente) {
-    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Sezione non disponibile</div>;
+  const sezioneCorrente = config.sezioni?.[currentSezione];
+  if (!sezioneCorrente || !sezioneCorrente.campi) {
+    return <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">Sezione non disponibile o incompleta</div>;
   }
   
-  const totaleSezioni = config.sezioni.length;
+  const totaleSezioni = config.sezioni?.length || 1;
   const progresso = ((currentSezione + 1) / totaleSezioni) * 100;
 
   const handleFieldChange = (fieldId: string, value: any) => {
@@ -36,6 +36,11 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
 
   const validateSezione = () => {
     const newErrors: Record<string, string> = {};
+    
+    if (!sezioneCorrente?.campi) {
+      setErrors(newErrors);
+      return true;
+    }
     
     sezioneCorrente.campi.forEach(campo => {
       if (campo.required) {
@@ -258,7 +263,7 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
           </div>
           {/* Navigation dots */}
           <div className="flex justify-between mt-3">
-            {config.sezioni.map((sezione, index) => (
+            {config.sezioni?.map((sezione, index) => (
               <button
                 key={sezione.id}
                 onClick={() => index <= currentSezione && setCurrentSezione(index)}
@@ -302,7 +307,7 @@ export default function WizardSchedaCompleta({ config, onComplete, onCancel }: W
               {sezioneCorrente?.titolo || 'Sezione'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sezioneCorrente?.campi.map(renderCampo)}
+              {sezioneCorrente?.campi?.map(renderCampo)}
             </div>
           </div>
         </div>
